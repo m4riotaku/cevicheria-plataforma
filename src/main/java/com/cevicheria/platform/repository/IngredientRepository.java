@@ -1,4 +1,4 @@
-package com.cevicheria.platform.inventory.repository;
+package com.cevicheria.platform.repository;
 
 import java.util.List;
 import java.util.Optional;
