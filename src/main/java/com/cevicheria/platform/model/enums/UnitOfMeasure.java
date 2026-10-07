@@ -1,4 +1,4 @@
-package com.cevicheria.platform.model;
+package com.cevicheria.platform.model.enums;
 
 public enum UnitOfMeasure {
     KG,

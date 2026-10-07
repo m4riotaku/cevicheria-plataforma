@@ -2,8 +2,12 @@ package com.cevicheria.platform.model;
 
 import java.math.BigDecimal;
 
+import com.cevicheria.platform.model.enums.UnitOfMeasure;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,8 +31,9 @@ public class IngredientPresentation {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, length = 30)
-    private String purchaseUnit;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private UnitOfMeasure purchaseUnit;
 
     @Column(nullable = false, precision = 14, scale = 4)
     private BigDecimal conversionFactor;
