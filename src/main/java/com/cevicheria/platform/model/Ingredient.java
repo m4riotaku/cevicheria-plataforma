@@ -2,8 +2,12 @@ package com.cevicheria.platform.model;
 
 import java.math.BigDecimal;
 
+import com.cevicheria.platform.model.enums.UnitOfMeasure;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,8 +40,9 @@ public class Ingredient {
     @Column(length = 255)
     private String description;
 
-    @Column(nullable = false, length = 30)
-    private String baseUnit;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private UnitOfMeasure baseUnit;
 
     @Column(nullable = false, precision = 7, scale = 4)
     private BigDecimal yieldPercentage = new BigDecimal("100.0000");
