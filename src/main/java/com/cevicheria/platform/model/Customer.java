@@ -38,8 +38,6 @@ public class Customer {
         referencedColumnName = "id"
     )
     private Business business;
-    @Column (nullable = false)
-    private Long businessId;
 
     @Column (nullable = false)
     private String name;
