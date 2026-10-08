@@ -39,6 +39,7 @@ public class Employee
     @JoinColumn(name = "business_id", referencedColumnName = "id")
     private Business business;
 
+    
     private String firstNames;
 
     private String lastNames;
