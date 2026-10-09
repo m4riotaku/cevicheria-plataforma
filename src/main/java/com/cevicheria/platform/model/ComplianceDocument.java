@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.cevicheria.platform.model.enums.DocumentStatus;
+import com.cevicheria.platform.model.enums.DocumentStates;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,21 +35,23 @@ public class ComplianceDocument
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "business_id", referencedColumnName = "id")
+    @JoinColumn(name = "business_id")
     private Business business;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", referencedColumnName = "id")
+    @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    //SUPPLIER
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "branch_id", referencedColumnName = "id")
+    @JoinColumn(name = "branch_id")
     private Branch branch;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "previous_document_id", referencedColumnName = "id")
+    @JoinColumn(name = "previous_document_id")
     private ComplianceDocument previousDocument;
 
     private String type;
@@ -65,7 +67,7 @@ public class ComplianceDocument
     private String fileUrl;
 
     @Enumerated(EnumType.STRING)
-    private DocumentStatus status = DocumentStatus.VIGENTE;
+    private DocumentStates status = DocumentStates.VIGENTE;
 
     private String notes;
 

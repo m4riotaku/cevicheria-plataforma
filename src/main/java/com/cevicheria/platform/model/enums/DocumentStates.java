@@ -1,6 +1,6 @@
 package com.cevicheria.platform.model.enums;
 
-public enum DocumentStatus
+public enum DocumentStates
 {
     VIGENTE,
     REEMPLAZADO,
