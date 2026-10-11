@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.cevicheria.platform.model.SecurityRole;
 
 @Repository
-public interface SucurityRoleRepository extends JpaRepository<SecurityRole,Long>
+public interface SecurityRoleRepository extends JpaRepository<SecurityRole,Long>
 {
 }
