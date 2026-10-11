@@ -33,7 +33,7 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Entity
-public class ComissionRule
+public class CommissionRule
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
