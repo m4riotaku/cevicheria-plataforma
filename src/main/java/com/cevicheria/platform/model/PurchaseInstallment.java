@@ -3,9 +3,12 @@ package com.cevicheria.platform.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,22 +22,24 @@ public class PurchaseInstallment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "business_id", nullable = false)
-    private Long businessId;
-
-    @Column(name = "branch_id", nullable = false)
-    private Long branchId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "purchase_id", nullable = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "purchase_id")
     private Purchase purchase;
 
-    @Column(nullable = false)
-    private Integer number; // Número de cuota (1, 2, 3...)
+    private Integer number;
 
-    @Column(name = "due_on", nullable = false)
-    private LocalDate dueOn; // Fecha de vencimiento de la cuota
+    private LocalDate dueOn;
 
-    @Column(nullable = false, precision = 18, scale = 2)
-    private BigDecimal amount = BigDecimal.ZERO; // Monto de la cuota
+    private BigDecimal amount = BigDecimal.ZERO;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

@@ -1,15 +1,13 @@
 package com.cevicheria.platform.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Getter
 @Setter
@@ -21,18 +19,28 @@ public class ComboOption {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long comboProductId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    @Column(nullable = false)
-    private Long optionProductId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "combo_product_id")
+    private Product comboProduct;
 
-    @Column(nullable = false)
-    private Integer minimumQuantity = 1;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "option_product_id")
+    private Product optionProduct;
 
-    @Column(nullable = false)
-    private Integer maximumQuantity = 1;
+    private Integer positionNumber;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal additionalPrice = BigDecimal.ZERO;
+    private String positionName;
+
+    private BigDecimal fraction = BigDecimal.ONE;
+
+    private BigDecimal surcharge = BigDecimal.ZERO;
+
+    private boolean active = true;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

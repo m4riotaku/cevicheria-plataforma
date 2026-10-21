@@ -1,15 +1,14 @@
 package com.cevicheria.platform.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.cevicheria.platform.model.enums.SalesChannel;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Getter
 @Setter
@@ -21,18 +20,37 @@ public class BranchProduct {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long branchId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    @Column(nullable = false)
-    private Long productId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal price;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
-    @Column(nullable = false)
-    private boolean available = true;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "preparation_area_id")
+    private PreparationArea preparationArea;
 
-    @Column(nullable = false)
-    private boolean published;
+    @Enumerated(EnumType.STRING)
+    private SalesChannel salesChannel;
+
+    private BigDecimal price = BigDecimal.ZERO;
+
+    private BigDecimal taxRate = new BigDecimal("0.18");
+
+    private String taxTreatmentCode = "10";
+
+    private boolean visible = true;
+
+    private boolean blocked = false;
+
+    private String blockReason;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

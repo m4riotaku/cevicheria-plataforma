@@ -3,14 +3,11 @@ package com.cevicheria.platform.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Getter
 @Setter
@@ -22,23 +19,32 @@ public class BatchControl {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long inventoryBatchId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    @Column(nullable = false, length = 40)
-    private String controlType;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 
-    @Column(precision = 7, scale = 2)
-    private BigDecimal temperatureCelsius;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "batch_id")
+    private InventoryBatch batch;
 
-    @Column(length = 100)
-    private String condition;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "responsible_employee_id")
+    private Employee responsibleEmployee;
 
-    @Column(length = 500)
-    private String notes;
+    private LocalDateTime recordDate;
 
-    private Long checkedByEmployeeId;
+    private BigDecimal temperature;
 
-    @Column(nullable = false)
-    private LocalDateTime checkedAt;
+    private String incident;
+
+    private String correctiveAction;
+
+    private String evidenceUrl;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

@@ -5,6 +5,8 @@ import com.cevicheria.platform.model.enums.DeliveryStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,46 +21,47 @@ public class Delivery {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO: FK real cuando M4riotaku publique Business
-    @Column(name = "business_id", nullable = false)
-    private Long businessId;
-
-    // TODO: FK real cuando M4riotaku publique Branch
-    @Column(name = "branch_id", nullable = false)
-    private Long branchId;
-
-    // TODO: FK real cuando M4riotaku publique CustomerOrder
-    @Column(name = "customer_order_id", nullable = false)
-    private Long customerOrderId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "delivery_zone_id", nullable = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "order_id")
+    private CustomerOrder order;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "delivery_zone_id")
     private DeliveryZone deliveryZone;
 
-    // TODO: FK real cuando MarcoGZRo publique Employee
-    @Column(name = "driver_employee_id")
-    private Long driverEmployeeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_employee_id")
+    private Employee driverEmployee;
 
-    @Column(name = "delivery_address", nullable = false, columnDefinition = "TEXT")
-    private String deliveryAddress;
+    private String driverName;
 
-    @Column(name = "delivery_fee", nullable = false, precision = 18, scale = 2)
-    private BigDecimal deliveryFee = BigDecimal.ZERO;
+    private String driverPhone;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private DeliveryStatus status = DeliveryStatus.PENDIENTE;
+    private String address;
 
-    @Column(name = "dispatched_at")
+    private BigDecimal deliveryFeeSnapshot = BigDecimal.ZERO;
+
+    private Integer estimatedMinutes;
+
+    private BigDecimal cashOnDeliveryAmount = BigDecimal.ZERO;
+
     private LocalDateTime dispatchedAt;
 
-    @Column(name = "delivered_at")
     private LocalDateTime deliveredAt;
 
-    // requerido si status = NO_ENTREGADO
-    @Column(name = "failure_reason", length = 250)
-    private String failureReason;
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus status = DeliveryStatus.PENDIENTE;
 
-    @Column(columnDefinition = "TEXT")
-    private String notes;
+    private String addressReference;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

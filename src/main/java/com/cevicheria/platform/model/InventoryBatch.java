@@ -4,14 +4,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.cevicheria.platform.model.enums.InventoryBatchStatus;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Getter
 @Setter
@@ -23,29 +21,43 @@ public class InventoryBatch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long ingredientId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    @Column(nullable = false)
-    private Long warehouseId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 
-    @Column(length = 100)
-    private String batchCode;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
 
-    @Column(nullable = false, precision = 14, scale = 4)
-    private BigDecimal receivedQuantity;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ingredient_id")
+    private Ingredient ingredient;
 
-    @Column(nullable = false, precision = 14, scale = 4)
-    private BigDecimal remainingQuantity;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "purchase_item_id")
+    private PurchaseItem purchaseItem;
 
-    @Column(nullable = false, precision = 14, scale = 4)
-    private BigDecimal unitCost;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_batch_id")
+    private InventoryBatch sourceBatch;
 
-    @Column(nullable = false)
+    private String code;
+
     private LocalDateTime receivedAt;
 
-    private LocalDate expirationDate;
+    private LocalDate dueOn;
 
-    @Column(nullable = false, length = 30)
-    private String status;
+    private BigDecimal onHandQuantity = BigDecimal.ZERO;
+
+    @Enumerated(EnumType.STRING)
+    private InventoryBatchStatus status = InventoryBatchStatus.APTO;
+
+    private String blockReason;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

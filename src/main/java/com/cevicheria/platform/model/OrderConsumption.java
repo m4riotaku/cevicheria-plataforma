@@ -3,14 +3,11 @@ package com.cevicheria.platform.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Getter
 @Setter
@@ -22,20 +19,26 @@ public class OrderConsumption {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long orderItemId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    @Column(nullable = false)
-    private Long ingredientId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 
-    private Long inventoryBatchId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "order_item_id")
+    private OrderItem orderItem;
 
-    @Column(nullable = false, precision = 14, scale = 4)
-    private BigDecimal quantity;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ingredient_id")
+    private Ingredient ingredient;
 
-    @Column(nullable = false, precision = 14, scale = 4)
-    private BigDecimal unitCost;
+    private BigDecimal baseQuantity;
 
-    @Column(nullable = false)
-    private LocalDateTime consumedAt;
+    private BigDecimal totalCost = BigDecimal.ZERO;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

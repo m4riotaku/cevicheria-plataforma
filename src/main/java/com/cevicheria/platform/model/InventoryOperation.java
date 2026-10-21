@@ -1,15 +1,18 @@
 package com.cevicheria.platform.model;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.cevicheria.platform.model.enums.InventoryOperationStatus;
+import com.cevicheria.platform.model.enums.InventoryOperationType;
+import com.cevicheria.platform.model.enums.InventoryReturnResolution;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.generator.EventType;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -21,29 +24,60 @@ public class InventoryOperation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long businessId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    private Long sourceWarehouseId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 
-    private Long destinationWarehouseId;
+    @Enumerated(EnumType.STRING)
+    private InventoryOperationType type;
 
-    @Column(nullable = false, length = 40)
-    private String operationType;
+    private LocalDateTime recordDate;
 
-    @Column(nullable = false, length = 30)
-    private String status;
+    private String operationKey;
 
-    @Column(length = 100)
-    private String referenceCode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_operation_id")
+    private InventoryOperation sourceOperation;
 
-    @Column(length = 500)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "purchase_id")
+    private Purchase purchase;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private CustomerOrder order;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "responsible_employee_id")
+    private Employee responsibleEmployee;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "authorized_by_user_business_id")
+    private UserBusiness authorizedByUserBusiness;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destination_branch_id")
+    private Branch destinationBranch;
+
+    private LocalDateTime cutoffAt;
+
+    @Enumerated(EnumType.STRING)
+    private InventoryOperationStatus status = InventoryOperationStatus.BORRADOR;
+
+    @Enumerated(EnumType.STRING)
+    private InventoryReturnResolution returnResolution;
+
     private String reason;
 
-    private Long createdByEmployeeId;
+    private String evidenceUrl;
 
-    @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> operationData;
+
+    @Generated(event = EventType.INSERT)
     private LocalDateTime createdAt;
-
-    private LocalDateTime completedAt;
 }

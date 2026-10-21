@@ -3,14 +3,11 @@ package com.cevicheria.platform.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Getter
 @Setter
@@ -22,20 +19,28 @@ public class InventoryBalance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long ingredientId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    @Column(nullable = false)
-    private Long warehouseId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 
-    @Column(nullable = false, precision = 14, scale = 4)
-    private BigDecimal quantityOnHand = BigDecimal.ZERO;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
 
-    @Column(nullable = false, precision = 14, scale = 4)
-    private BigDecimal averageUnitCost = BigDecimal.ZERO;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ingredient_id")
+    private Ingredient ingredient;
 
-    @Column(precision = 14, scale = 4)
-    private BigDecimal minimumStock;
+    private BigDecimal quantity = BigDecimal.ZERO;
 
-    private LocalDateTime updatedAt;
+    private BigDecimal averageCost = BigDecimal.ZERO;
+
+    private BigDecimal minimumStock = BigDecimal.ZERO;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

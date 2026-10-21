@@ -3,14 +3,11 @@ package com.cevicheria.platform.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Getter
 @Setter
@@ -22,21 +19,24 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long productId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    @Column(nullable = false, length = 120)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
-    @Column(nullable = false, precision = 10, scale = 3)
-    private BigDecimal portionCount;
+    private Integer version;
 
-    @Column(length = 2000)
-    private String instructions;
+    private BigDecimal servings;
 
-    @Column(nullable = false)
+    private BigDecimal yieldRatio = BigDecimal.ONE;
+
     private boolean active = true;
 
-    @Column(nullable = false)
+    private String instructions;
+
+    @Generated(event = EventType.INSERT)
     private LocalDateTime createdAt;
 }

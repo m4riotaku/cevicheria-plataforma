@@ -6,8 +6,13 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import com.cevicheria.platform.model.enums.ReservationStatus;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.generator.EventType;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -19,42 +24,44 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO: FK real cuando M4riotaku publique Business
-    @Column(name = "business_id", nullable = false)
-    private Long businessId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    // TODO: FK real cuando M4riotaku publique Branch
-    @Column(name = "branch_id", nullable = false)
-    private Long branchId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 
-    // TODO: FK real cuando v0oidzx publique Customer
-    @Column(name = "customer_id")
-    private Long customerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
-    // TODO: FK real cuando M4riotaku publique DiningTable
-    @Column(name = "dining_table_id")
-    private Long diningTableId; // se asigna al llegar si no se reservó mesa específica
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dining_table_id")
+    private DiningTable diningTable;
 
-    // TODO: FK real cuando M4riotaku publique CustomerOrder
-    @Column(name = "customer_order_id")
-    private Long customerOrderId;
+    private String contactName;
 
-    @Column(name = "scheduled_at", nullable = false)
-    private LocalDateTime scheduledAt;
+    private String phone;
 
-    @Column(name = "party_size", nullable = false)
-    private Integer partySize;
+    private LocalDateTime startsAt;
 
-    @Column(name = "deposit_amount", nullable = false, precision = 18, scale = 2)
-    private BigDecimal depositAmount = BigDecimal.ZERO;
+    private LocalDateTime endsAt;
 
-    @Column(name = "deposit_consumed", nullable = false)
-    private boolean depositConsumed = false;
+    private Integer guestCount;
+
+    private Integer toleranceMinutes = 15;
+
+    private BigDecimal requiredDeposit = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private ReservationStatus status = ReservationStatus.PENDIENTE;
 
-    @Column(columnDefinition = "TEXT")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> cancellationPolicy;
+
     private String notes;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }
