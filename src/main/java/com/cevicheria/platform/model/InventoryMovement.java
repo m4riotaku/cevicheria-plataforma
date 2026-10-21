@@ -3,14 +3,12 @@ package com.cevicheria.platform.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.cevicheria.platform.model.enums.InventoryMovementType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Getter
 @Setter
@@ -22,23 +20,54 @@ public class InventoryMovement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long inventoryOperationId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    @Column(nullable = false)
-    private Long ingredientId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 
-    private Long inventoryBatchId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "operation_id")
+    private InventoryOperation operation;
 
-    @Column(nullable = false, length = 20)
-    private String movementType;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "batch_id")
+    private InventoryBatch batch;
 
-    @Column(nullable = false, precision = 14, scale = 4)
-    private BigDecimal quantity;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "purchase_item_id")
+    private PurchaseItem purchaseItem;
 
-    @Column(nullable = false, precision = 14, scale = 4)
-    private BigDecimal unitCost;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_consumption_id")
+    private OrderConsumption orderConsumption;
 
-    @Column(nullable = false)
-    private LocalDateTime occurredAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_movement_id")
+    private InventoryMovement sourceMovement;
+
+    private Integer sequenceNumber;
+
+    @Enumerated(EnumType.STRING)
+    private InventoryMovementType type;
+
+    private BigDecimal quantity = BigDecimal.ZERO;
+
+    private BigDecimal unitCost = BigDecimal.ZERO;
+
+    @Generated(event = {EventType.INSERT, EventType.UPDATE})
+    private BigDecimal valueAmount;
+
+    private BigDecimal expectedQuantity;
+
+    private BigDecimal countedQuantity;
+
+    private LocalDateTime recordDate;
+
+    private String concept;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

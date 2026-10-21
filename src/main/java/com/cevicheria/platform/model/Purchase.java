@@ -6,9 +6,12 @@ import com.cevicheria.platform.model.enums.PurchaseType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,58 +25,50 @@ public class Purchase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO: FK real cuando M4riotaku publique Business
-    @Column(name = "business_id", nullable = false)
-    private Long businessId;
-
-    // TODO: FK real cuando M4riotaku publique Branch
-    @Column(name = "branch_id", nullable = false)
-    private Long branchId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "supplier_id", nullable = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "purchase_order_id")
-    private PurchaseOrder purchaseOrder; // null en compras directas sin OC
+    private PurchaseOrder purchaseOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "source_purchase_id")
-    private Purchase sourcePurchase; // requerido en notas de crédito/débito
+    private Purchase sourcePurchase;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private PurchaseType type;
 
-    @Column(nullable = false, length = 20)
-    private String series; // ej: F001, B001
+    private String series;
 
-    @Column(nullable = false, length = 30)
     private String number;
 
-    @Column(name = "record_date", nullable = false)
     private LocalDate recordDate;
 
-    @Column(name = "expiration_date")
     private LocalDate expirationDate;
 
-    @Column(name = "currency_code", nullable = false, length = 3)
     private String currencyCode = "PEN";
 
-    @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal subtotal = BigDecimal.ZERO;
 
-    @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal tax = BigDecimal.ZERO;
 
-    @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal total = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 15)
     private PurchaseStatus status = PurchaseStatus.BORRADOR;
 
-    @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

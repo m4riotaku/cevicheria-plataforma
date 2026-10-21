@@ -1,13 +1,13 @@
 package com.cevicheria.platform.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,21 +19,24 @@ public class Modifier {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long businessId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(length = 255)
-    private String description;
-
-    @Column(nullable = false)
-    private Integer minimumSelections = 0;
-
-    @Column(nullable = false)
-    private Integer maximumSelections = 1;
-
-    @Column(nullable = false)
     private boolean active = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    private BigDecimal extraPrice = BigDecimal.ZERO;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

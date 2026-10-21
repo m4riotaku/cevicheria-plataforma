@@ -9,6 +9,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.cevicheria.platform.model.enums.PurchaseOrderStatus;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Getter
 @Setter
@@ -22,48 +24,43 @@ public class PurchaseOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO: FK real cuando M4riotaku publique Business
-    @Column(name = "business_id", nullable = false)
-    private Long businessId;
-
-    // TODO: FK real cuando M4riotaku publique Branch
-    @Column(name = "branch_id", nullable = false)
-    private Long branchId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "supplier_id", nullable = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
-    // TODO: FK real cuando turinovi publique Warehouse
-    @Column(name = "warehouse_id", nullable = false)
-    private Long warehouseId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
 
-    @Column(nullable = false, length = 40)
-    private String number; // ej: OC-0001
+    private String number;
 
-    @Column(name = "record_date", nullable = false)
     private LocalDate recordDate;
 
-    @Column(name = "expected_delivery_date")
     private LocalDate expectedDeliveryDate;
 
-    @Column(name = "currency_code", nullable = false, length = 3)
     private String currencyCode = "PEN";
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private PurchaseOrderStatus status = PurchaseOrderStatus.BORRADOR;
 
-    // TODO: FK real cuando MarcoGZRo publique UserBusiness
-    @Column(name = "approved_by_user_business_id")
-    private Long approvedByUserBusinessId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "approved_by_user_business_id")
+    private UserBusiness approvedByUserBusiness;
 
-    @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
-    @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal total = BigDecimal.ZERO;
 
-    @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

@@ -1,19 +1,15 @@
 package com.cevicheria.platform.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import com.cevicheria.platform.model.enums.UnitOfMeasure;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Getter
 @Setter
@@ -25,28 +21,29 @@ public class Ingredient {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long businessId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    @Column(nullable = false)
-    private Long categoryId;
-
-    @Column(nullable = false, length = 30)
-    private String code;
-
-    @Column(nullable = false, length = 120)
     private String name;
 
-    @Column(length = 255)
-    private String description;
+    private boolean active = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    private String code;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private UnitOfMeasure baseUnit;
 
-    @Column(nullable = false, precision = 7, scale = 4)
-    private BigDecimal yieldPercentage = new BigDecimal("100.0000");
+    private boolean perishable = true;
 
-    @Column(nullable = false)
-    private boolean active = true;
+    private BigDecimal minTemperature;
+
+    private BigDecimal maxTemperature;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

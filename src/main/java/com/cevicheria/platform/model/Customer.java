@@ -52,7 +52,7 @@ public class Customer {
 
     private LocalDate birthDate;
 
-    private Boolean active = true;
+    private boolean active = true;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "JSON")

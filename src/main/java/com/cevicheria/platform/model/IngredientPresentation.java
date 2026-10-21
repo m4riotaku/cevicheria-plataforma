@@ -1,19 +1,15 @@
 package com.cevicheria.platform.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-import com.cevicheria.platform.model.enums.UnitOfMeasure;
+import com.cevicheria.platform.model.enums.IngredientPresentationType;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Getter
 @Setter
@@ -25,22 +21,25 @@ public class IngredientPresentation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long ingredientId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    @Column(nullable = false, length = 100)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ingredient_id")
+    private Ingredient ingredient;
+
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private UnitOfMeasure purchaseUnit;
+    private IngredientPresentationType type;
 
-    @Column(nullable = false, precision = 14, scale = 4)
-    private BigDecimal conversionFactor;
+    private BigDecimal baseConversionFactor;
 
-    @Column(nullable = false)
-    private boolean defaultPresentation;
+    private BigDecimal baseTare = BigDecimal.ZERO;
 
-    @Column(nullable = false)
     private boolean active = true;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

@@ -1,13 +1,12 @@
 package com.cevicheria.platform.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,17 +18,18 @@ public class Warehouse {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long businessId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    private Long branchId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 
-    @Column(nullable = false, length = 120)
     private String name;
 
-    @Column(length = 255)
-    private String description;
-
-    @Column(nullable = false)
     private boolean active = true;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

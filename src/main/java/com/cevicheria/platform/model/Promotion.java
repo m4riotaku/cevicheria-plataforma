@@ -2,15 +2,16 @@ package com.cevicheria.platform.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.cevicheria.platform.model.enums.PromotionType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.generator.EventType;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -22,31 +23,30 @@ public class Promotion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long businessId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
 
-    private Long branchId;
-
-    private Long productId;
-
-    @Column(nullable = false, length = 120)
     private String name;
 
-    @Column(length = 500)
-    private String description;
-
-    @Column(nullable = false, length = 30)
-    private String promotionType;
-
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal discountValue;
-
-    @Column(nullable = false)
-    private LocalDateTime startsAt;
-
-    @Column(nullable = false)
-    private LocalDateTime endsAt;
-
-    @Column(nullable = false)
     private boolean active = true;
+
+    @Enumerated(EnumType.STRING)
+    private PromotionType type;
+
+    private BigDecimal valueAmount = BigDecimal.ZERO;
+
+    private Integer priority = 0;
+
+    private boolean stackable = false;
+
+    private LocalDateTime validFrom;
+
+    private LocalDateTime validUntil;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> conditions;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }

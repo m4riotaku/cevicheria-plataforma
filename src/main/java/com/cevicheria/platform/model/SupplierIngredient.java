@@ -4,6 +4,11 @@ package com.cevicheria.platform.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,16 +23,29 @@ public class SupplierIngredient {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "supplier_id", nullable = false)
+    @JoinColumn(name = "business_id")
+    private Business business;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
-    // TODO: FK real cuando turinovi publique Ingredient
-    @Column(name = "ingredient_id", nullable = false)
-    private Long ingredientId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ingredient_id")
+    private Ingredient ingredient;
 
-    @Column(name = "brand_name")
-    private String brandName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "presentation_id")
+    private IngredientPresentation presentation;
 
-    @Column(name = "is_preferred", nullable = false)
+    private String brand;
+
+    private BigDecimal referencePrice = BigDecimal.ZERO;
+
     private boolean preferred = false;
+
+    private boolean active = true;
+
+    @Generated(event = EventType.INSERT)
+    private LocalDateTime createdAt;
 }
