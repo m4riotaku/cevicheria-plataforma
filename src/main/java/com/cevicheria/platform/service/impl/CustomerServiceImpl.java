@@ -73,7 +73,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public Customer updateCustomer(Long id, Customer customer) {
 	    Customer currentCustomer = getCustomerById(id);
 
-	    currentCustomer.setActive(customer.getActive());
+	    currentCustomer.setActive(customer.isActive());
 
 		if(customer.getName() != null) {
 		    currentCustomer.setName(customer.getName());
