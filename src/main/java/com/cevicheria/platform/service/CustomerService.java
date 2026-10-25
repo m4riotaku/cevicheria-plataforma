@@ -1,6 +1,5 @@
 package com.cevicheria.platform.service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import com.cevicheria.platform.model.Customer;
@@ -13,17 +12,15 @@ public interface CustomerService {
 
 	List<Customer> getCustomersByName(String name);
 
-	List<Customer> getCustomersByDocumentType(String documentType);
-
 	List<Customer> getCustomersByDocumentNumber(String documentNumber);
 
 	List<Customer> getCustomersByPhone(String phone);
 
 	List<Customer> getCustomersByEmail(String email);
 
-	List<Customer> getCustomersByBirthDate(LocalDate birthDate);
-
 	List<Customer> getCustomersByPreferences(String preferences);
+
+	List<Customer> searchCustomers(String name, String documentType, String documentNumber, String phone, String email, Boolean active);
 
 	Customer saveCustomer(Customer customer);
 

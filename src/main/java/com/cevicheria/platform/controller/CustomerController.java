@@ -1,6 +1,5 @@
 package com.cevicheria.platform.controller;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -35,11 +34,6 @@ public class CustomerController {
         return customerService.getCustomerById(id);
     }
 
-    @GetMapping("/filter/documentType")
-    public List<Customer> getCustomersByDocumentType(@RequestParam String documentType) {
-        return customerService.getCustomersByDocumentType(documentType);
-    }
-
     @GetMapping("/filter/document")
     public List<Customer> getCustomersByDocumentNumber(@RequestParam String documentNumber) {
         return customerService.getCustomersByDocumentNumber(documentNumber);
@@ -55,14 +49,28 @@ public class CustomerController {
         return customerService.getCustomersByEmail(email);
     }
 
-    @GetMapping("/filter/birthDate")
-    public List<Customer> getCustomersByBirthDate(@RequestParam LocalDate birthDate) {
-        return customerService.getCustomersByBirthDate(birthDate);
-    }
-
     @GetMapping("/filter/preferences")
     public List<Customer> getCustomersByPreferences(@RequestParam String preferences) {
         return customerService.getCustomersByPreferences(preferences);
+    }
+
+	@GetMapping("/search")
+    public List<Customer> searchCustomers(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String documentType,
+            @RequestParam(required = false) String documentNumber,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) Boolean active) {
+
+        return customerService.searchCustomers(
+                name,
+                documentType,
+                documentNumber,
+                phone,
+                email,
+                active
+        );
     }
 
     @PostMapping
