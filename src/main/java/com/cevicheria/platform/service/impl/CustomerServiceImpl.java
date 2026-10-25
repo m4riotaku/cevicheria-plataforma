@@ -2,16 +2,16 @@ package com.cevicheria.platform.service.impl;
 
 import java.util.List;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.cevicheria.platform.handlerException.ResourceNotFoundException;
 import com.cevicheria.platform.model.Customer;
 import com.cevicheria.platform.repository.CustomerRepository;
 import com.cevicheria.platform.service.CustomerService;
+import com.cevicheria.platform.specification.CustomerSpecification;
 
 import lombok.RequiredArgsConstructor;
-
-import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -35,11 +35,6 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public List<Customer> getCustomersByDocumentType(String documentType) {
-	    return customerRepository.findByDocumentType(documentType);
-	}
-
-	@Override
 	public List<Customer> getCustomersByDocumentNumber(String documentNumber) {
 	    return customerRepository.findByDocumentNumber(documentNumber);
 	}
@@ -52,11 +47,6 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	public List<Customer> getCustomersByEmail(String email) {
 	    return customerRepository.findByEmail(email);
-	}
-
-	@Override
-	public List<Customer> getCustomersByBirthDate(LocalDate birthDate) {
-	    return customerRepository.findByBirthDate(birthDate);
 	}
 
 	@Override
@@ -115,4 +105,23 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = getCustomerById(id);
 	    customerRepository.deleteById(customer.getId());
 	}
+
+	public List<Customer> searchCustomers(
+            String name,
+            String documentType,
+            String documentNumber,
+            String phone,
+            String email,
+            Boolean active) {
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecification.nameContains(name))
+                .and(CustomerSpecification.documentTypeEquals(documentType))
+                .and(CustomerSpecification.documentNumberEquals(documentNumber))
+                .and(CustomerSpecification.phoneEquals(phone))
+                .and(CustomerSpecification.emailEquals(email))
+                .and(CustomerSpecification.activeEquals(active));
+
+        return customerRepository.findAll(spec);
+    }
 }
