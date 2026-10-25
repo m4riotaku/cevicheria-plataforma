@@ -61,40 +61,31 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public Customer updateCustomer(Long id, Customer customer) {
-	    Customer currentCustomer = getCustomerById(id);
-
-	    currentCustomer.setActive(customer.isActive());
+	    Customer currentCustomer = customerRepository.findById(id).orElseThrow(
+				() -> new ResourceNotFoundException("Customer", id));
 
 		if(customer.getName() != null) {
-		    currentCustomer.setName(customer.getName());
+		    currentCustomer.changeName(customer.getName());
 		}
 
-		if (customer.getDocumentType() != null) {
-		    currentCustomer.setDocumentType(customer.getDocumentType());
-		}
-
-		if(customer.getDocumentNumber() != null) {
-		    currentCustomer.setDocumentNumber(customer.getDocumentNumber());
+		if(customer.getDocumentNumber() != null || customer.getDocumentType() != null) {
+		    currentCustomer.changeDocument(customer.getDocumentType(), customer.getDocumentNumber());
 		}
 
 		if(customer.getPhone() != null) {
-		    currentCustomer.setPhone(customer.getPhone());
+		    currentCustomer.changePhone(customer.getPhone());
 		}
 
 		if(customer.getEmail() != null) {
-		    currentCustomer.setEmail(customer.getEmail());
+		    currentCustomer.changeEmail(customer.getEmail());
 		}
 
 		if(customer.getBirthDate() != null) {
-		    currentCustomer.setBirthDate(customer.getBirthDate());
-		}
-
-		if(customer.getAddresses() != null) {
-		    currentCustomer.setAddresses(customer.getAddresses());
+		    currentCustomer.changeBirthDate(customer.getBirthDate());
 		}
 
 		if(customer.getPreferences() != null) {
-		    currentCustomer.setPreferences(customer.getPreferences());
+		    currentCustomer.changePreferences(customer.getPreferences());
 		}
 
 		return customerRepository.save(currentCustomer);
