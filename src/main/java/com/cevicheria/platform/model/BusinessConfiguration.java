@@ -8,8 +8,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,7 +36,8 @@ public class BusinessConfiguration {
     @Generated(event = EventType.INSERT)
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "business_id", insertable = false, updatable = false)
     private Business business;
 
@@ -51,11 +54,8 @@ public class BusinessConfiguration {
         if (business == null) {
             throw new InvalidEntityDataException("El negocio es obligatorio");
         }
-        if (business.getId() == null) {
-            throw new InvalidEntityDataException("El negocio debe estar registrado antes de realizar la asociación");
-        }
+
         this.business = business;
-        this.businessId = business.getId();
     }
 
     public void changeInvoiceEnvironment(InvoiceEnvironment invoiceEnvironment) {
