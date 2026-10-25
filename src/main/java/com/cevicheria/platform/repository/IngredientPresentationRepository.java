@@ -10,6 +10,4 @@ import com.cevicheria.platform.model.IngredientPresentation;
 public interface IngredientPresentationRepository extends JpaRepository<IngredientPresentation, Long> {
 
     List<IngredientPresentation> findByIngredientIdAndActiveTrue(Long ingredientId);
-
-    Optional<IngredientPresentation> findByIngredientIdAndDefaultPresentationTrue(Long ingredientId);
 }

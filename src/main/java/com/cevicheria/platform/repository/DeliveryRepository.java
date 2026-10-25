@@ -1,5 +1,6 @@
 package com.cevicheria.platform.repository;
 
+import com.cevicheria.platform.model.CustomerOrder;
 import com.cevicheria.platform.model.Delivery;
 import com.cevicheria.platform.model.enums.DeliveryStatus;
 
@@ -14,8 +15,7 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
 
     List<Delivery> findByBusinessIdAndBranchIdAndStatus(Long businessId, Long branchId, DeliveryStatus status);
 
-    Optional<Delivery> findByCustomerOrderId(Long customerOrderId);
+    Optional<Delivery> findByOrder(CustomerOrder order);
 
-    // todos los pedidos asignados a un repartidor
     List<Delivery> findByDriverEmployeeIdAndStatus(Long driverEmployeeId, DeliveryStatus status);
 }
