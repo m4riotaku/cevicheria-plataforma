@@ -15,11 +15,13 @@ import org.hibernate.generator.EventType;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserAccount {
-
+public class UserAccount
+{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String userName;
 
     private String email;
 
@@ -38,69 +40,114 @@ public class UserAccount {
     @Generated(event = EventType.INSERT)
     private LocalDateTime createdAt;
 
-    public UserAccount(String email) {
+    public UserAccount(String userName, String email, String passwordHash)
+    {
+        changeUserName(userName);
         changeEmail(email);
+        changePasswordHash(passwordHash);
     }
 
-    public void changeEmail(String value) {
-        if (value == null) {
+    public void changeUserName(String newUserName)
+    {
+        if(newUserName == null || newUserName.isBlank())
+        {
+            throw new InvalidEntityDataException("El nombre de usuario es obligatorio");
+        }
+
+        if(newUserName.trim().length() > 30)
+        {
+            throw new InvalidEntityDataException("El nombre de usuario no puede exceder de los 30 caracteres");
+        }
+
+        userName = newUserName;
+    }
+
+    public void changeEmail(String value)
+    {
+        if (value == null)
+        {
             throw new InvalidEntityDataException("El correo electrónico es obligatoria");
         }
-        if (value.isBlank()) {
+
+        if (value.isBlank())
+        {
             throw new InvalidEntityDataException("El correo electrónico no puede estar vacío");
         }
+
         String normalized = value.trim();
-        if (normalized.length() > 150) {
+
+        if (normalized.length() > 150)
+        {
             throw new InvalidEntityDataException("El correo electrónico no puede superar 150 caracteres");
         }
-        if (!normalized.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+
+        if (!normalized.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))
+        {
             throw new InvalidEntityDataException("El correo electrónico no tiene un formato válido");
         }
+
         this.email = normalized;
     }
 
-    public void changePasswordHash(String value) {
-        if (value == null || value.isBlank()) {
+    public void changePasswordHash(String value)
+    {
+        if (value == null || value.isBlank())
+        {
             this.passwordHash = null;
             return;
         }
+
         String normalized = value.trim();
-        if (normalized.length() > 255) {
+        if (normalized.length() > 255)
+        {
             throw new InvalidEntityDataException("El hash de contraseña no puede superar 255 caracteres");
         }
+
         this.passwordHash = normalized;
     }
 
-    public void activate() {
-        if (this.passwordHash == null || this.passwordHash.isBlank()) {
+    public void activate()
+    {
+        if (this.passwordHash == null || this.passwordHash.isBlank())
+        {
             throw new InvalidEntityDataException("La contraseña debe estar configurada antes de activar la cuenta");
         }
+
         this.active = true;
     }
 
-    public void deactivate() {
+    public void deactivate()
+    {
         this.active = false;
     }
 
-    public void changeLastAccessAt(LocalDateTime value) {
+    public void changeLastAccessAt(LocalDateTime value)
+    {
         this.lastAccessAt = value;
     }
 
-    public void changeSessionVersion(Integer value) {
-        if (value != null && value < 0) {
+    public void changeSessionVersion(Integer value)
+    {
+        if (value != null && value < 0)
+        {
             throw new InvalidEntityDataException("El session version no puede ser negativo");
         }
+
         this.sessionVersion = value;
     }
 
-    public void changePasswordResetTokenHash(byte[] value) {
-        if (value != null && value.length != 32) {
-            throw new InvalidEntityDataException("El password reset token hash debe contener 32 bytes");
+    public void changePasswordResetTokenHash(byte[] value)
+    {
+        if (value != null && value.length != 32)
+        {
+            throw new InvalidEntityDataException("El newPassword reset token hash debe contener 32 bytes");
         }
+
         this.passwordResetTokenHash = value == null ? null : value.clone();
     }
 
-    public void changePasswordResetTokenExpiresAt(LocalDateTime value) {
+    public void changePasswordResetTokenExpiresAt(LocalDateTime value)
+    {
         this.passwordResetTokenExpiresAt = value;
     }
 }

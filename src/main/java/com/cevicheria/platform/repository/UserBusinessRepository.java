@@ -8,4 +8,5 @@ import com.cevicheria.platform.model.UserBusiness;
 @Repository
 public interface UserBusinessRepository extends JpaRepository<UserBusiness,Long>
 {
+    boolean existsByUserAccountId(Long id);
 }
