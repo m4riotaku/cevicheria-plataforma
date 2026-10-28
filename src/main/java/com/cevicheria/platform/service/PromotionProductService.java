@@ -13,6 +13,8 @@ public interface PromotionProductService {
 
     List<PromotionProduct> getByProduct(Long businessId, Long productId);
 
+    boolean existsForPromotionAndProduct(Long businessId, Long promotionId, Long productId);
+
     PromotionProduct getById(PromotionProductId id);
 
     PromotionProduct save(PromotionProduct promotionProduct);

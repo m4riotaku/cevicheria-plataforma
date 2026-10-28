@@ -20,12 +20,18 @@ public class PromotionWeekdayServiceImpl implements PromotionWeekdayService {
 
     @Override
     public List<PromotionWeekday> getAllByBusiness(Long businessId) {
-        return promotionWeekdayRepository.findByBusiness_Id(businessId);
+        return promotionWeekdayRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<PromotionWeekday> getByPromotion(Long businessId, Long promotionId) {
-        return promotionWeekdayRepository.findByBusiness_IdAndPromotion_Id(businessId, promotionId);
+        return promotionWeekdayRepository.findByBusinessIdAndPromotionId(businessId, promotionId);
+    }
+
+    @Override
+    public boolean existsForPromotionAndWeekday(Long businessId, Long promotionId, Integer weekday) {
+        return promotionWeekdayRepository.existsByBusinessIdAndPromotionIdAndIdWeekday(
+                businessId, promotionId, weekday);
     }
 
     @Override

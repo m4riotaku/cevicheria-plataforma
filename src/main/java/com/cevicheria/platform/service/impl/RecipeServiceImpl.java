@@ -19,12 +19,24 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<Recipe> getAllByBusiness(Long businessId) {
-        return recipeRepository.findByBusiness_Id(businessId);
+        return recipeRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<Recipe> getByProduct(Long businessId, Long productId) {
-        return recipeRepository.findByBusiness_IdAndProduct_Id(businessId, productId);
+        return recipeRepository.findByBusinessIdAndProductId(businessId, productId);
+    }
+
+    @Override
+    public List<Recipe> getActiveByProduct(Long businessId, Long productId) {
+        return recipeRepository.findByBusinessIdAndProductIdAndActiveTrue(businessId, productId);
+    }
+
+    @Override
+    public Recipe getLatestActiveByProduct(Long businessId, Long productId) {
+        return recipeRepository.findFirstByBusinessIdAndProductIdAndActiveTrueOrderByVersionDesc(
+                businessId, productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe", productId));
     }
 
     @Override

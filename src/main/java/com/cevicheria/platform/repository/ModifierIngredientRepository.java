@@ -8,9 +8,9 @@ import com.cevicheria.platform.model.ModifierIngredient;
 
 public interface ModifierIngredientRepository extends JpaRepository<ModifierIngredient, Long> {
 
-	List<ModifierIngredient> findByBusiness_Id(Long businessId);
+	List<ModifierIngredient> findByBusinessId(Long businessId);
 
-	List<ModifierIngredient> findByBusiness_IdAndModifier_Id(Long businessId, Long modifierId);
+	List<ModifierIngredient> findByBusinessIdAndModifierId(Long businessId, Long modifierId);
 
-	List<ModifierIngredient> findByBusiness_IdAndIngredient_Id(Long businessId, Long ingredientId);
+	List<ModifierIngredient> findByBusinessIdAndIngredientId(Long businessId, Long ingredientId);
 }

@@ -21,12 +21,12 @@ public class PromotionRequirementServiceImpl implements PromotionRequirementServ
 
     @Override
     public List<PromotionRequirement> getAllByBusiness(Long businessId) {
-        return promotionRequirementRepository.findByBusiness_Id(businessId);
+        return promotionRequirementRepository.findByBusinessId(businessId);
     }
 
     @Override
     public Optional<PromotionRequirement> getByPromotion(Long businessId, Long promotionId) {
-        return promotionRequirementRepository.findByBusiness_IdAndPromotion_Id(businessId, promotionId);
+        return promotionRequirementRepository.findByBusinessIdAndPromotionId(businessId, promotionId);
     }
 
     @Override

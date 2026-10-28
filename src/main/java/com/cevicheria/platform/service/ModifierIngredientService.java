@@ -10,6 +10,8 @@ public interface ModifierIngredientService {
 
     List<ModifierIngredient> getByModifier(Long businessId, Long modifierId);
 
+    List<ModifierIngredient> getByIngredient(Long businessId, Long ingredientId);
+
     ModifierIngredient getById(Long id);
 
     ModifierIngredient save(ModifierIngredient ingredient);

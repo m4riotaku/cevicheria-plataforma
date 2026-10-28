@@ -11,6 +11,8 @@ public interface PromotionBranchService {
 
     List<PromotionBranch> getByPromotion(Long businessId, Long promotionId);
 
+    boolean existsForPromotionAndBranch(Long businessId, Long promotionId, Long branchId);
+
     PromotionBranch getById(PromotionBranchId id);
 
     PromotionBranch save(PromotionBranch promotionBranch);

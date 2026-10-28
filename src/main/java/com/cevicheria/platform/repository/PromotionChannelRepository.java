@@ -9,7 +9,10 @@ import com.cevicheria.platform.model.id.PromotionChannelId;
 
 public interface PromotionChannelRepository extends JpaRepository<PromotionChannel, PromotionChannelId> {
 
-    List<PromotionChannel> findByBusiness_Id(Long businessId);
+    List<PromotionChannel> findByBusinessId(Long businessId);
 
-    List<PromotionChannel> findByBusiness_IdAndPromotion_Id(Long businessId, Long promotionId);
+    List<PromotionChannel> findByBusinessIdAndPromotionId(Long businessId, Long promotionId);
+
+    boolean existsByBusinessIdAndPromotionIdAndIdSalesChannel(
+            Long businessId, Long promotionId, com.cevicheria.platform.model.enums.SalesChannel salesChannel);
 }

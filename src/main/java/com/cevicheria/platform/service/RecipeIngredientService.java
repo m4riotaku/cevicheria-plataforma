@@ -10,6 +10,8 @@ public interface RecipeIngredientService {
 
     List<RecipeIngredient> getByRecipe(Long businessId, Long recipeId);
 
+    List<RecipeIngredient> getByIngredient(Long businessId, Long ingredientId);
+
     RecipeIngredient getById(Long id);
 
     RecipeIngredient save(RecipeIngredient ingredient);

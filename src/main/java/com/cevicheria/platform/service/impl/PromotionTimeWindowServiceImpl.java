@@ -20,12 +20,18 @@ public class PromotionTimeWindowServiceImpl implements PromotionTimeWindowServic
 
     @Override
     public List<PromotionTimeWindow> getAllByBusiness(Long businessId) {
-        return promotionTimeWindowRepository.findByBusiness_Id(businessId);
+        return promotionTimeWindowRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<PromotionTimeWindow> getByPromotion(Long businessId, Long promotionId) {
-        return promotionTimeWindowRepository.findByBusiness_IdAndPromotion_Id(businessId, promotionId);
+        return promotionTimeWindowRepository.findByBusinessIdAndPromotionId(businessId, promotionId);
+    }
+
+    @Override
+    public boolean existsForPromotionAndSequence(Long businessId, Long promotionId, Integer sequenceNumber) {
+        return promotionTimeWindowRepository.existsByBusinessIdAndPromotionIdAndIdSequenceNumber(
+                businessId, promotionId, sequenceNumber);
     }
 
     @Override

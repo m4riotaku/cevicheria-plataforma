@@ -19,17 +19,35 @@ public class BranchProductServiceImpl implements BranchProductService {
 
     @Override
     public List<BranchProduct> getAllByBusiness(Long businessId) {
-        return branchProductRepository.findByBusiness_Id(businessId);
+        return branchProductRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<BranchProduct> getByBranch(Long businessId, Long branchId) {
-        return branchProductRepository.findByBusiness_IdAndBranch_Id(businessId, branchId);
+        return branchProductRepository.findByBusinessIdAndBranchId(businessId, branchId);
     }
 
     @Override
     public List<BranchProduct> getByProduct(Long businessId, Long productId) {
-        return branchProductRepository.findByBusiness_IdAndProduct_Id(businessId, productId);
+        return branchProductRepository.findByBusinessIdAndProductId(businessId, productId);
+    }
+
+    @Override
+    public List<BranchProduct> getVisibleByBranch(Long businessId, Long branchId) {
+        return branchProductRepository.findByBusinessIdAndBranchIdAndVisibleTrue(businessId, branchId);
+    }
+
+    @Override
+    public List<BranchProduct> getAvailableByBranch(Long businessId, Long branchId) {
+        return branchProductRepository.findByBusinessIdAndBranchIdAndBlockedFalse(businessId, branchId);
+    }
+
+    @Override
+    public BranchProduct getByBranchProductAndChannel(Long businessId, Long branchId, Long productId,
+            com.cevicheria.platform.model.enums.SalesChannel salesChannel) {
+        return branchProductRepository.findByBusinessIdAndBranchIdAndProductIdAndSalesChannel(
+                businessId, branchId, productId, salesChannel)
+                .orElseThrow(() -> new ResourceNotFoundException("BranchProduct", productId));
     }
 
     @Override

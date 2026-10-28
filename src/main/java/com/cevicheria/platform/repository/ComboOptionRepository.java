@@ -8,9 +8,11 @@ import com.cevicheria.platform.model.ComboOption;
 
 public interface ComboOptionRepository extends JpaRepository<ComboOption, Long> {
 
-	List<ComboOption> findByBusiness_Id(Long businessId);
+	List<ComboOption> findByBusinessId(Long businessId);
 
-	List<ComboOption> findByBusiness_IdAndComboProduct_Id(Long businessId, Long comboProductId);
+	List<ComboOption> findByBusinessIdAndComboProductId(Long businessId, Long comboProductId);
 
-	List<ComboOption> findByBusiness_IdAndOptionProduct_Id(Long businessId, Long optionProductId);
+	List<ComboOption> findByBusinessIdAndComboProductIdAndActiveTrue(Long businessId, Long comboProductId);
+
+	List<ComboOption> findByBusinessIdAndOptionProductId(Long businessId, Long optionProductId);
 }

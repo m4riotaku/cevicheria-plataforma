@@ -12,7 +12,11 @@ public interface ModifierService {
 
     List<Modifier> getByProduct(Long businessId, Long productId);
 
+    List<Modifier> getActiveByProduct(Long businessId, Long productId);
+
     List<Modifier> getByCategory(Long businessId, Long categoryId);
+
+    List<Modifier> getActiveByCategory(Long businessId, Long categoryId);
 
     Modifier getById(Long id);
 

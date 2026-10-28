@@ -8,12 +8,19 @@ import com.cevicheria.platform.model.BranchProduct;
 
 public interface BranchProductRepository extends JpaRepository<BranchProduct, Long> {
 
-	List<BranchProduct> findByBusiness_Id(Long businessId);
+	List<BranchProduct> findByBusinessId(Long businessId);
 
-	List<BranchProduct> findByBusiness_IdAndBranch_Id(Long businessId, Long branchId);
+	List<BranchProduct> findByBusinessIdAndBranchId(Long businessId, Long branchId);
 
-	List<BranchProduct> findByBusiness_IdAndProduct_Id(Long businessId, Long productId);
+	List<BranchProduct> findByBusinessIdAndProductId(Long businessId, Long productId);
 
-	boolean existsByBusiness_IdAndBranch_IdAndProduct_IdAndSalesChannel(
+	List<BranchProduct> findByBusinessIdAndBranchIdAndVisibleTrue(Long businessId, Long branchId);
+
+	List<BranchProduct> findByBusinessIdAndBranchIdAndBlockedFalse(Long businessId, Long branchId);
+
+	java.util.Optional<BranchProduct> findByBusinessIdAndBranchIdAndProductIdAndSalesChannel(
+			Long businessId, Long branchId, Long productId, com.cevicheria.platform.model.enums.SalesChannel salesChannel);
+
+	boolean existsByBusinessIdAndBranchIdAndProductIdAndSalesChannel(
 			Long businessId, Long branchId, Long productId, com.cevicheria.platform.model.enums.SalesChannel salesChannel);
 }

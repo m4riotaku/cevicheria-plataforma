@@ -9,9 +9,11 @@ import com.cevicheria.platform.model.id.PromotionBranchId;
 
 public interface PromotionBranchRepository extends JpaRepository<PromotionBranch, PromotionBranchId> {
 
-    List<PromotionBranch> findByBusiness_Id(Long businessId);
+    List<PromotionBranch> findByBusinessId(Long businessId);
 
-    List<PromotionBranch> findByBusiness_IdAndPromotion_Id(Long businessId, Long promotionId);
+    List<PromotionBranch> findByBusinessIdAndPromotionId(Long businessId, Long promotionId);
 
-    List<PromotionBranch> findByBusiness_IdAndBranch_Id(Long businessId, Long branchId);
+    List<PromotionBranch> findByBusinessIdAndBranchId(Long businessId, Long branchId);
+
+    boolean existsByBusinessIdAndPromotionIdAndBranchId(Long businessId, Long promotionId, Long branchId);
 }

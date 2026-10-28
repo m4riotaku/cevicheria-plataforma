@@ -3,12 +3,19 @@ package com.cevicheria.platform.service;
 import java.util.List;
 
 import com.cevicheria.platform.model.Product;
+import com.cevicheria.platform.model.enums.ProductType;
 
 public interface ProductService {
 
     List<Product> getAllByBusiness(Long businessId);
 
     List<Product> getActiveByBusiness(Long businessId);
+
+    List<Product> getByCategory(Long businessId, Long categoryId);
+
+    List<Product> getActiveByCategory(Long businessId, Long categoryId);
+
+    List<Product> getByType(Long businessId, ProductType type);
 
     Product getById(Long id);
 

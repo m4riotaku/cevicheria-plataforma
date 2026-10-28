@@ -9,7 +9,9 @@ import com.cevicheria.platform.model.id.PromotionWeekdayId;
 
 public interface PromotionWeekdayRepository extends JpaRepository<PromotionWeekday, PromotionWeekdayId> {
 
-    List<PromotionWeekday> findByBusiness_Id(Long businessId);
+    List<PromotionWeekday> findByBusinessId(Long businessId);
 
-    List<PromotionWeekday> findByBusiness_IdAndPromotion_Id(Long businessId, Long promotionId);
+    List<PromotionWeekday> findByBusinessIdAndPromotionId(Long businessId, Long promotionId);
+
+    boolean existsByBusinessIdAndPromotionIdAndIdWeekday(Long businessId, Long promotionId, Integer weekday);
 }

@@ -19,12 +19,17 @@ public class ModifierIngredientServiceImpl implements ModifierIngredientService 
 
     @Override
     public List<ModifierIngredient> getAllByBusiness(Long businessId) {
-        return modifierIngredientRepository.findByBusiness_Id(businessId);
+        return modifierIngredientRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<ModifierIngredient> getByModifier(Long businessId, Long modifierId) {
-        return modifierIngredientRepository.findByBusiness_IdAndModifier_Id(businessId, modifierId);
+        return modifierIngredientRepository.findByBusinessIdAndModifierId(businessId, modifierId);
+    }
+
+    @Override
+    public List<ModifierIngredient> getByIngredient(Long businessId, Long ingredientId) {
+        return modifierIngredientRepository.findByBusinessIdAndIngredientId(businessId, ingredientId);
     }
 
     @Override

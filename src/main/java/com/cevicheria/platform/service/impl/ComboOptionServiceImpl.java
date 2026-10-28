@@ -19,12 +19,22 @@ public class ComboOptionServiceImpl implements ComboOptionService {
 
     @Override
     public List<ComboOption> getAllByBusiness(Long businessId) {
-        return comboOptionRepository.findByBusiness_Id(businessId);
+        return comboOptionRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<ComboOption> getByComboProduct(Long businessId, Long comboProductId) {
-        return comboOptionRepository.findByBusiness_IdAndComboProduct_Id(businessId, comboProductId);
+        return comboOptionRepository.findByBusinessIdAndComboProductId(businessId, comboProductId);
+    }
+
+    @Override
+    public List<ComboOption> getActiveByComboProduct(Long businessId, Long comboProductId) {
+        return comboOptionRepository.findByBusinessIdAndComboProductIdAndActiveTrue(businessId, comboProductId);
+    }
+
+    @Override
+    public List<ComboOption> getByOptionProduct(Long businessId, Long optionProductId) {
+        return comboOptionRepository.findByBusinessIdAndOptionProductId(businessId, optionProductId);
     }
 
     @Override

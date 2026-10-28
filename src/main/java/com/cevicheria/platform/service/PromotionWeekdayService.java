@@ -11,6 +11,8 @@ public interface PromotionWeekdayService {
 
     List<PromotionWeekday> getByPromotion(Long businessId, Long promotionId);
 
+    boolean existsForPromotionAndWeekday(Long businessId, Long promotionId, Integer weekday);
+
     PromotionWeekday getById(PromotionWeekdayId id);
 
     PromotionWeekday save(PromotionWeekday promotionWeekday);

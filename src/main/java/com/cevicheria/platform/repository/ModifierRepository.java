@@ -8,11 +8,15 @@ import com.cevicheria.platform.model.Modifier;
 
 public interface ModifierRepository extends JpaRepository<Modifier, Long> {
 
-	List<Modifier> findByBusiness_Id(Long businessId);
+	List<Modifier> findByBusinessId(Long businessId);
 
-	List<Modifier> findByBusiness_IdAndActiveTrue(Long businessId);
+	List<Modifier> findByBusinessIdAndActiveTrue(Long businessId);
 
-	List<Modifier> findByBusiness_IdAndProduct_Id(Long businessId, Long productId);
+	List<Modifier> findByBusinessIdAndProductId(Long businessId, Long productId);
 
-	List<Modifier> findByBusiness_IdAndCategory_Id(Long businessId, Long categoryId);
+	List<Modifier> findByBusinessIdAndProductIdAndActiveTrue(Long businessId, Long productId);
+
+	List<Modifier> findByBusinessIdAndCategoryId(Long businessId, Long categoryId);
+
+	List<Modifier> findByBusinessIdAndCategoryIdAndActiveTrue(Long businessId, Long categoryId);
 }

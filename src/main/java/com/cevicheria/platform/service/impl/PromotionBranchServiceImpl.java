@@ -20,12 +20,18 @@ public class PromotionBranchServiceImpl implements PromotionBranchService {
 
     @Override
     public List<PromotionBranch> getAllByBusiness(Long businessId) {
-        return promotionBranchRepository.findByBusiness_Id(businessId);
+        return promotionBranchRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<PromotionBranch> getByPromotion(Long businessId, Long promotionId) {
-        return promotionBranchRepository.findByBusiness_IdAndPromotion_Id(businessId, promotionId);
+        return promotionBranchRepository.findByBusinessIdAndPromotionId(businessId, promotionId);
+    }
+
+    @Override
+    public boolean existsForPromotionAndBranch(Long businessId, Long promotionId, Long branchId) {
+        return promotionBranchRepository.existsByBusinessIdAndPromotionIdAndBranchId(
+                businessId, promotionId, branchId);
     }
 
     @Override

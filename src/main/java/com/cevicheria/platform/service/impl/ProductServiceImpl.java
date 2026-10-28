@@ -19,12 +19,27 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> getAllByBusiness(Long businessId) {
-        return productRepository.findByBusiness_Id(businessId);
+        return productRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<Product> getActiveByBusiness(Long businessId) {
-        return productRepository.findByBusiness_IdAndActiveTrue(businessId);
+        return productRepository.findByBusinessIdAndActiveTrue(businessId);
+    }
+
+    @Override
+    public List<Product> getByCategory(Long businessId, Long categoryId) {
+        return productRepository.findByBusinessIdAndCategoryId(businessId, categoryId);
+    }
+
+    @Override
+    public List<Product> getActiveByCategory(Long businessId, Long categoryId) {
+        return productRepository.findByBusinessIdAndActiveTrueAndCategoryId(businessId, categoryId);
+    }
+
+    @Override
+    public List<Product> getByType(Long businessId, com.cevicheria.platform.model.enums.ProductType type) {
+        return productRepository.findByBusinessIdAndType(businessId, type);
     }
 
     @Override
@@ -35,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getByBusinessAndCode(Long businessId, String code) {
-        return productRepository.findByBusiness_IdAndCode(businessId, code)
+        return productRepository.findByBusinessIdAndCode(businessId, code)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", businessId));
     }
 

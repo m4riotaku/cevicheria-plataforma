@@ -9,7 +9,10 @@ import com.cevicheria.platform.model.id.PromotionTimeWindowId;
 
 public interface PromotionTimeWindowRepository extends JpaRepository<PromotionTimeWindow, PromotionTimeWindowId> {
 
-    List<PromotionTimeWindow> findByBusiness_Id(Long businessId);
+    List<PromotionTimeWindow> findByBusinessId(Long businessId);
 
-    List<PromotionTimeWindow> findByBusiness_IdAndPromotion_Id(Long businessId, Long promotionId);
+    List<PromotionTimeWindow> findByBusinessIdAndPromotionId(Long businessId, Long promotionId);
+
+    boolean existsByBusinessIdAndPromotionIdAndIdSequenceNumber(
+            Long businessId, Long promotionId, Integer sequenceNumber);
 }

@@ -19,12 +19,12 @@ public class PromotionServiceImpl implements PromotionService {
 
     @Override
     public List<Promotion> getAllByBusiness(Long businessId) {
-        return promotionRepository.findByBusiness_Id(businessId);
+        return promotionRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<Promotion> getActiveByBusiness(Long businessId) {
-        return promotionRepository.findByBusiness_IdAndActiveTrue(businessId);
+        return promotionRepository.findByBusinessIdAndActiveTrue(businessId);
     }
 
     @Override

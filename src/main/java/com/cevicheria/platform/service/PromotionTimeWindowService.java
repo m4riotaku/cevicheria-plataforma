@@ -11,6 +11,8 @@ public interface PromotionTimeWindowService {
 
     List<PromotionTimeWindow> getByPromotion(Long businessId, Long promotionId);
 
+    boolean existsForPromotionAndSequence(Long businessId, Long promotionId, Integer sequenceNumber);
+
     PromotionTimeWindow getById(PromotionTimeWindowId id);
 
     PromotionTimeWindow save(PromotionTimeWindow promotionTimeWindow);

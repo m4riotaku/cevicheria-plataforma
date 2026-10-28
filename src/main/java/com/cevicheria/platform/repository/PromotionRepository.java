@@ -8,7 +8,7 @@ import com.cevicheria.platform.model.Promotion;
 
 public interface PromotionRepository extends JpaRepository<Promotion, Long> {
 
-	List<Promotion> findByBusiness_Id(Long businessId);
+	List<Promotion> findByBusinessId(Long businessId);
 
-	List<Promotion> findByBusiness_IdAndActiveTrue(Long businessId);
+	List<Promotion> findByBusinessIdAndActiveTrue(Long businessId);
 }

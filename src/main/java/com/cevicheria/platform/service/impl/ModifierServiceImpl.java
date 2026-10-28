@@ -19,22 +19,32 @@ public class ModifierServiceImpl implements ModifierService {
 
     @Override
     public List<Modifier> getAllByBusiness(Long businessId) {
-        return modifierRepository.findByBusiness_Id(businessId);
+        return modifierRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<Modifier> getActiveByBusiness(Long businessId) {
-        return modifierRepository.findByBusiness_IdAndActiveTrue(businessId);
+        return modifierRepository.findByBusinessIdAndActiveTrue(businessId);
     }
 
     @Override
     public List<Modifier> getByProduct(Long businessId, Long productId) {
-        return modifierRepository.findByBusiness_IdAndProduct_Id(businessId, productId);
+        return modifierRepository.findByBusinessIdAndProductId(businessId, productId);
+    }
+
+    @Override
+    public List<Modifier> getActiveByProduct(Long businessId, Long productId) {
+        return modifierRepository.findByBusinessIdAndProductIdAndActiveTrue(businessId, productId);
     }
 
     @Override
     public List<Modifier> getByCategory(Long businessId, Long categoryId) {
-        return modifierRepository.findByBusiness_IdAndCategory_Id(businessId, categoryId);
+        return modifierRepository.findByBusinessIdAndCategoryId(businessId, categoryId);
+    }
+
+    @Override
+    public List<Modifier> getActiveByCategory(Long businessId, Long categoryId) {
+        return modifierRepository.findByBusinessIdAndCategoryIdAndActiveTrue(businessId, categoryId);
     }
 
     @Override

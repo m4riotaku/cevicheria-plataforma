@@ -10,6 +10,10 @@ public interface RecipeService {
 
     List<Recipe> getByProduct(Long businessId, Long productId);
 
+    List<Recipe> getActiveByProduct(Long businessId, Long productId);
+
+    Recipe getLatestActiveByProduct(Long businessId, Long productId);
+
     Recipe getById(Long id);
 
     Recipe save(Recipe recipe);

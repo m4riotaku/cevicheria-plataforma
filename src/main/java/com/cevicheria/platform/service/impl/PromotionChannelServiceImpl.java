@@ -20,12 +20,19 @@ public class PromotionChannelServiceImpl implements PromotionChannelService {
 
     @Override
     public List<PromotionChannel> getAllByBusiness(Long businessId) {
-        return promotionChannelRepository.findByBusiness_Id(businessId);
+        return promotionChannelRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<PromotionChannel> getByPromotion(Long businessId, Long promotionId) {
-        return promotionChannelRepository.findByBusiness_IdAndPromotion_Id(businessId, promotionId);
+        return promotionChannelRepository.findByBusinessIdAndPromotionId(businessId, promotionId);
+    }
+
+    @Override
+    public boolean existsForPromotionAndChannel(Long businessId, Long promotionId,
+            com.cevicheria.platform.model.enums.SalesChannel salesChannel) {
+        return promotionChannelRepository.existsByBusinessIdAndPromotionIdAndIdSalesChannel(
+                businessId, promotionId, salesChannel);
     }
 
     @Override

@@ -19,12 +19,17 @@ public class RecipeIngredientServiceImpl implements RecipeIngredientService {
 
     @Override
     public List<RecipeIngredient> getAllByBusiness(Long businessId) {
-        return recipeIngredientRepository.findByBusiness_Id(businessId);
+        return recipeIngredientRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<RecipeIngredient> getByRecipe(Long businessId, Long recipeId) {
-        return recipeIngredientRepository.findByBusiness_IdAndRecipe_Id(businessId, recipeId);
+        return recipeIngredientRepository.findByBusinessIdAndRecipeId(businessId, recipeId);
+    }
+
+    @Override
+    public List<RecipeIngredient> getByIngredient(Long businessId, Long ingredientId) {
+        return recipeIngredientRepository.findByBusinessIdAndIngredientId(businessId, ingredientId);
     }
 
     @Override

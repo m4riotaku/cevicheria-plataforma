@@ -10,7 +10,7 @@ import com.cevicheria.platform.model.id.PromotionRequirementId;
 
 public interface PromotionRequirementRepository extends JpaRepository<PromotionRequirement, PromotionRequirementId> {
 
-    List<PromotionRequirement> findByBusiness_Id(Long businessId);
+    List<PromotionRequirement> findByBusinessId(Long businessId);
 
-    Optional<PromotionRequirement> findByBusiness_IdAndPromotion_Id(Long businessId, Long promotionId);
+    Optional<PromotionRequirement> findByBusinessIdAndPromotionId(Long businessId, Long promotionId);
 }

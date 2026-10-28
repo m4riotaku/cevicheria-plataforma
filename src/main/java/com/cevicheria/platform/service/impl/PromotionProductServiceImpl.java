@@ -20,17 +20,23 @@ public class PromotionProductServiceImpl implements PromotionProductService {
 
     @Override
     public List<PromotionProduct> getAllByBusiness(Long businessId) {
-        return promotionProductRepository.findByBusiness_Id(businessId);
+        return promotionProductRepository.findByBusinessId(businessId);
     }
 
     @Override
     public List<PromotionProduct> getByPromotion(Long businessId, Long promotionId) {
-        return promotionProductRepository.findByBusiness_IdAndPromotion_Id(businessId, promotionId);
+        return promotionProductRepository.findByBusinessIdAndPromotionId(businessId, promotionId);
     }
 
     @Override
     public List<PromotionProduct> getByProduct(Long businessId, Long productId) {
-        return promotionProductRepository.findByBusiness_IdAndProduct_Id(businessId, productId);
+        return promotionProductRepository.findByBusinessIdAndProductId(businessId, productId);
+    }
+
+    @Override
+    public boolean existsForPromotionAndProduct(Long businessId, Long promotionId, Long productId) {
+        return promotionProductRepository.existsByBusinessIdAndPromotionIdAndProductId(
+                businessId, promotionId, productId);
     }
 
     @Override

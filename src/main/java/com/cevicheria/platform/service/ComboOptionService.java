@@ -10,6 +10,10 @@ public interface ComboOptionService {
 
     List<ComboOption> getByComboProduct(Long businessId, Long comboProductId);
 
+    List<ComboOption> getActiveByComboProduct(Long businessId, Long comboProductId);
+
+    List<ComboOption> getByOptionProduct(Long businessId, Long optionProductId);
+
     ComboOption getById(Long id);
 
     ComboOption save(ComboOption comboOption);

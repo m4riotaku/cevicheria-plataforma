@@ -9,11 +9,16 @@ import com.cevicheria.platform.model.Recipe;
 
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
-	List<Recipe> findByBusiness_Id(Long businessId);
+	List<Recipe> findByBusinessId(Long businessId);
 
-	List<Recipe> findByBusiness_IdAndProduct_Id(Long businessId, Long productId);
+	List<Recipe> findByBusinessIdAndProductId(Long businessId, Long productId);
 
-	Optional<Recipe> findByBusiness_IdAndProduct_IdAndVersion(Long businessId, Long productId, Integer version);
+	List<Recipe> findByBusinessIdAndProductIdAndActiveTrue(Long businessId, Long productId);
 
-	boolean existsByBusiness_IdAndProduct_IdAndVersion(Long businessId, Long productId, Integer version);
+	java.util.Optional<Recipe> findFirstByBusinessIdAndProductIdAndActiveTrueOrderByVersionDesc(
+			Long businessId, Long productId);
+
+	Optional<Recipe> findByBusinessIdAndProductIdAndVersion(Long businessId, Long productId, Integer version);
+
+	boolean existsByBusinessIdAndProductIdAndVersion(Long businessId, Long productId, Integer version);
 }
