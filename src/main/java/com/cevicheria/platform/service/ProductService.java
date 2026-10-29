@@ -2,6 +2,8 @@ package com.cevicheria.platform.service;
 
 import java.util.List;
 
+import com.cevicheria.platform.dto.ProductCreateRequest;
+import com.cevicheria.platform.dto.ProductUpdateRequest;
 import com.cevicheria.platform.model.Product;
 import com.cevicheria.platform.model.enums.ProductType;
 
@@ -21,9 +23,13 @@ public interface ProductService {
 
     Product getByBusinessAndCode(Long businessId, String code);
 
+    Product create(ProductCreateRequest request);
+
     Product save(Product product);
 
     Product update(Long id, Product product);
+
+    Product update(Long id, ProductUpdateRequest request);
 
     void deleteById(Long id);
 }

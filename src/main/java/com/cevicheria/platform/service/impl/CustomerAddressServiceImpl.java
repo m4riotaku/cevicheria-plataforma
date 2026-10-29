@@ -30,7 +30,7 @@ public class CustomerAddressServiceImpl implements CustomerAddressService {
 	@Override
 	public CustomerAddress updateCustomerAddress(Long id, CustomerAddress customerAddress) {
 	    CustomerAddress currentCustomerAddress = customerAddressRepository.findById(id).orElseThrow(
-				() -> new ResourceNotFoundException("CustomerAddress", id));
+					() -> new ResourceNotFoundException("CustomerAddress", "ID", id));
 
 		if(customerAddress.getLabel() != null) {
 		    currentCustomerAddress.changeLabel(customerAddress.getLabel());
@@ -66,7 +66,7 @@ public class CustomerAddressServiceImpl implements CustomerAddressService {
 	@Override
 	public void deleteCustomerAddressById(Long id) {
         CustomerAddress customerAddress = customerAddressRepository.findById(id).orElseThrow(
-				() -> new ResourceNotFoundException("CustomerAddress", id));
+					() -> new ResourceNotFoundException("CustomerAddress", "ID", id));
 	    customerAddressRepository.deleteById(customerAddress.getId());
 	}
 }

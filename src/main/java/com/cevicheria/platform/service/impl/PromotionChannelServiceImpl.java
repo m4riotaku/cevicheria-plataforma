@@ -38,7 +38,7 @@ public class PromotionChannelServiceImpl implements PromotionChannelService {
     @Override
     public PromotionChannel getById(PromotionChannelId id) {
         return promotionChannelRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("PromotionChannel", id.getPromotionId()));
+                .orElseThrow(() -> new ResourceNotFoundException("PromotionChannel", "ID", id));
     }
 
     @Override

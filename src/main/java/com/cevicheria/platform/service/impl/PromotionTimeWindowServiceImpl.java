@@ -37,7 +37,7 @@ public class PromotionTimeWindowServiceImpl implements PromotionTimeWindowServic
     @Override
     public PromotionTimeWindow getById(PromotionTimeWindowId id) {
         return promotionTimeWindowRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("PromotionTimeWindow", id.getPromotionId()));
+                .orElseThrow(() -> new ResourceNotFoundException("PromotionTimeWindow", "ID", id));
     }
 
     @Override

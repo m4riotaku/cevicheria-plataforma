@@ -35,7 +35,7 @@ public class RecipeIngredientServiceImpl implements RecipeIngredientService {
     @Override
     public RecipeIngredient getById(Long id) {
         return recipeIngredientRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("RecipeIngredient", id));
+                .orElseThrow(() -> new ResourceNotFoundException("RecipeIngredient", "ID", id));
     }
 
     @Override

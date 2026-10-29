@@ -47,13 +47,13 @@ public class BranchProductServiceImpl implements BranchProductService {
             com.cevicheria.platform.model.enums.SalesChannel salesChannel) {
         return branchProductRepository.findByBusinessIdAndBranchIdAndProductIdAndSalesChannel(
                 businessId, branchId, productId, salesChannel)
-                .orElseThrow(() -> new ResourceNotFoundException("BranchProduct", productId));
+                .orElseThrow(() -> new ResourceNotFoundException("BranchProduct", "ID", productId));
     }
 
     @Override
     public BranchProduct getById(Long id) {
         return branchProductRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("BranchProduct", id));
+                .orElseThrow(() -> new ResourceNotFoundException("BranchProduct", "ID", id));
     }
 
     @Override
@@ -64,8 +64,12 @@ public class BranchProductServiceImpl implements BranchProductService {
     @Override
     public BranchProduct update(Long id, BranchProduct branchProduct) {
         BranchProduct current = getById(id);
-        current.changePrice(branchProduct.getPrice());
-        current.changeTaxTreatmentCode(branchProduct.getTaxTreatmentCode());
+        if (branchProduct.getPrice() != null) {
+            current.changePrice(branchProduct.getPrice());
+        }
+        if (branchProduct.getTaxTreatmentCode() != null) {
+            current.changeTaxTreatmentCode(branchProduct.getTaxTreatmentCode());
+        }
         if (branchProduct.isVisible()) {
             current.enableVisible();
         } else {
@@ -76,7 +80,9 @@ public class BranchProductServiceImpl implements BranchProductService {
         } else {
             current.unblock();
         }
-        current.changePreparationArea(branchProduct.getPreparationArea());
+        if (branchProduct.getPreparationArea() != null) {
+            current.changePreparationArea(branchProduct.getPreparationArea());
+        }
         return branchProductRepository.save(current);
     }
 

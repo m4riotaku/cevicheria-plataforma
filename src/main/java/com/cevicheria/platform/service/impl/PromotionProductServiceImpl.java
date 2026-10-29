@@ -42,7 +42,7 @@ public class PromotionProductServiceImpl implements PromotionProductService {
     @Override
     public PromotionProduct getById(PromotionProductId id) {
         return promotionProductRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("PromotionProduct", id.getPromotionId()));
+                .orElseThrow(() -> new ResourceNotFoundException("PromotionProduct", "ID", id));
     }
 
     @Override

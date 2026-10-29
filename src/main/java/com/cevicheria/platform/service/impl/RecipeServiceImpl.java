@@ -36,13 +36,13 @@ public class RecipeServiceImpl implements RecipeService {
     public Recipe getLatestActiveByProduct(Long businessId, Long productId) {
         return recipeRepository.findFirstByBusinessIdAndProductIdAndActiveTrueOrderByVersionDesc(
                 businessId, productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Recipe", productId));
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "productId", productId));
     }
 
     @Override
     public Recipe getById(Long id) {
         return recipeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Recipe", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe", "ID", id));
     }
 
     @Override

@@ -32,7 +32,7 @@ public class PromotionRequirementServiceImpl implements PromotionRequirementServ
     @Override
     public PromotionRequirement getById(PromotionRequirementId id) {
         return promotionRequirementRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("PromotionRequirement", id.getPromotionId()));
+                .orElseThrow(() -> new ResourceNotFoundException("PromotionRequirement", "ID", id));
     }
 
     @Override
