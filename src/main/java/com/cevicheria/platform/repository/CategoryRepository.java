@@ -8,5 +8,7 @@ import com.cevicheria.platform.model.Category;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
+    List<Category> findByBusinessId(Long businessId);
+
     List<Category> findByBusinessIdAndActiveTrue(Long businessId);
 }

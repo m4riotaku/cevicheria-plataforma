@@ -8,4 +8,7 @@ import com.cevicheria.platform.model.BatchControl;
 
 public interface BatchControlRepository extends JpaRepository<BatchControl, Long>
 {
+	List<BatchControl> findByBusinessIdOrderByRecordDateDesc(Long businessId);
+
+	List<BatchControl> findByBusinessIdAndBatchIdOrderByRecordDateDesc(Long businessId, Long batchId);
 }
