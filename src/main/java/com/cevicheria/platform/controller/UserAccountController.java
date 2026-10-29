@@ -34,7 +34,7 @@ public class UserAccountController
     }
 
 
-    @GetMapping
+    @GetMapping("/search")
     public List<UserAccountResponse> searchUsers(
             @RequestParam(required = false) String userName,
             @RequestParam(required = false) String email,
