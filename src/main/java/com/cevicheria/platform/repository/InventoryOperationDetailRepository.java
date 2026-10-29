@@ -1,0 +1,16 @@
+package com.cevicheria.platform.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.cevicheria.platform.model.InventoryOperationDetail;
+import com.cevicheria.platform.model.id.InventoryOperationDetailId;
+
+public interface InventoryOperationDetailRepository
+        extends JpaRepository<InventoryOperationDetail, InventoryOperationDetailId> {
+
+    List<InventoryOperationDetail> findByBusinessId(Long businessId);
+
+    List<InventoryOperationDetail> findByBusinessIdAndOperationId(Long businessId, Long operationId);
+}

@@ -9,5 +9,11 @@ import com.cevicheria.platform.model.IngredientPresentation;
 
 public interface IngredientPresentationRepository extends JpaRepository<IngredientPresentation, Long> {
 
+    List<IngredientPresentation> findByBusinessId(Long businessId);
+
+    List<IngredientPresentation> findByBusinessIdAndIngredientId(Long businessId, Long ingredientId);
+
     List<IngredientPresentation> findByIngredientIdAndActiveTrue(Long ingredientId);
+
+    List<IngredientPresentation> findByBusinessIdAndIngredientIdAndActiveTrue(Long businessId, Long ingredientId);
 }
