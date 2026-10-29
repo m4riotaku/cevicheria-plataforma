@@ -35,7 +35,7 @@ public class ModifierIngredientServiceImpl implements ModifierIngredientService 
     @Override
     public ModifierIngredient getById(Long id) {
         return modifierIngredientRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ModifierIngredient", id));
+                .orElseThrow(() -> new ResourceNotFoundException("ModifierIngredient", "ID", id));
     }
 
     @Override

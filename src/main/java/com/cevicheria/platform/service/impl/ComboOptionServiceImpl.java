@@ -40,7 +40,7 @@ public class ComboOptionServiceImpl implements ComboOptionService {
     @Override
     public ComboOption getById(Long id) {
         return comboOptionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ComboOption", id));
+                .orElseThrow(() -> new ResourceNotFoundException("ComboOption", "ID", id));
     }
 
     @Override

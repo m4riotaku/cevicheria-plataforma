@@ -37,7 +37,7 @@ public class PromotionBranchServiceImpl implements PromotionBranchService {
     @Override
     public PromotionBranch getById(PromotionBranchId id) {
         return promotionBranchRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("PromotionBranch", id.getPromotionId()));
+                .orElseThrow(() -> new ResourceNotFoundException("PromotionBranch", "ID", id));
     }
 
     @Override

@@ -50,7 +50,7 @@ public class ModifierServiceImpl implements ModifierService {
     @Override
     public Modifier getById(Long id) {
         return modifierRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Modifier", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Modifier", "ID", id));
     }
 
     @Override

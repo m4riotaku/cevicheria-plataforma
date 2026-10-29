@@ -37,7 +37,7 @@ public class PromotionWeekdayServiceImpl implements PromotionWeekdayService {
     @Override
     public PromotionWeekday getById(PromotionWeekdayId id) {
         return promotionWeekdayRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("PromotionWeekday", id.getPromotionId()));
+                .orElseThrow(() -> new ResourceNotFoundException("PromotionWeekday", "ID", id));
     }
 
     @Override
