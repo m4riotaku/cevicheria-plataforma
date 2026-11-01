@@ -1,12 +1,16 @@
 package com.cevicheria.platform.repository;
 
-import com.cevicheria.platform.model.Reservation;
+import java.util.Optional;
+
+import java.util.List;
+
 import com.cevicheria.platform.model.enums.ReservationStatus;
+
+import com.cevicheria.platform.model.Reservation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long>
@@ -15,4 +19,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>
     //reservas en un rango de fechas (ej: vista del día)
     //List<Reservation> findByBusinessIdAndBranchIdAndScheduledAtBetween(Long businessId, Long branchId, LocalDateTime from, LocalDateTime to);
     List<Reservation> findByCustomerId(Long customerId);
+    Optional<Reservation> findByIdAndBusinessId(Long id, Long businessId);
+    List<Reservation> findByBusinessIdAndBranchId(Long businessId, Long branchId);
 }

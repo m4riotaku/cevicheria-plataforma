@@ -4,6 +4,9 @@ import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import java.util.List;
 import java.util.ArrayList;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import com.cevicheria.platform.model.enums.ReservationStatus;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -58,7 +61,8 @@ public class Reservation {
 
     private BigDecimal requiredDeposit = new BigDecimal("0.00");
 
-    private String status = "PENDIENTE";
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status = ReservationStatus.PENDIENTE;
 
     private String notes;
 
@@ -181,18 +185,11 @@ public class Reservation {
         this.requiredDeposit = value;
     }
 
-    public void changeStatus(String value) {
+    public void changeStatus(ReservationStatus value) {
         if (value == null) {
             throw new InvalidEntityDataException("El estado es obligatorio");
         }
-        if (value.isBlank()) {
-            throw new InvalidEntityDataException("El estado no puede estar vacío");
-        }
-        String normalized = value.trim().toUpperCase(java.util.Locale.ROOT);
-        if (!(normalized.equals("PENDIENTE") || normalized.equals("CONFIRMADA") || normalized.equals("ATENDIDA") || normalized.equals("CANCELADA") || normalized.equals("NO_ASISTIO"))) {
-            throw new InvalidEntityDataException("El estado no coincide con los valores permitidos por la base de datos");
-        }
-        this.status = normalized;
+        this.status = value;
     }
 
     public void changeNotes(String value) {

@@ -2,8 +2,8 @@ package com.cevicheria.platform.model.enums;
 
 public enum DeliveryStatus {
     PENDIENTE,
-    EN_CAMINO,
+    ASIGNADO,
+    EN_RUTA,
     ENTREGADO,
-    NO_ENTREGADO,
-    CANCELADO
+    FALLIDO
 }
