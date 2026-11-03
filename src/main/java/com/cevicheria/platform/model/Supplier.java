@@ -4,6 +4,8 @@ import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import java.util.List;
 import java.util.ArrayList;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +22,7 @@ import org.hibernate.generator.EventType;
 
 @Getter
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"business_id", "document_type", "document_number"}))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Supplier {
 

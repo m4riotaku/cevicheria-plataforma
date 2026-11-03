@@ -2,6 +2,8 @@ package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,6 +19,7 @@ import org.hibernate.generator.EventType;
 
 @Getter
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"business_id", "name"}))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SupplierBrand {
 

@@ -184,9 +184,6 @@ public class PurchaseItem {
         if (value != null && value.signum() < 0) {
             throw new InvalidEntityDataException("La rejected base cantidad no puede ser negativo");
         }
-        if (value != null && value.signum() <= 0) {
-            throw new InvalidEntityDataException("La rejected base cantidad debe ser mayor que cero");
-        }
         this.rejectedBaseQuantity = value;
     }
 

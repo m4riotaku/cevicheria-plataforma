@@ -1,14 +1,18 @@
 package com.cevicheria.platform.repository;
 
-import com.cevicheria.platform.model.Purchase;
-import com.cevicheria.platform.model.enums.PurchaseStatus;
+import java.util.Optional;
+
+import java.util.List;
+
 import com.cevicheria.platform.model.enums.PurchaseType;
+
+import com.cevicheria.platform.model.enums.PurchaseStatus;
+
+import com.cevicheria.platform.model.Purchase;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
@@ -22,4 +26,5 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
 
     boolean existsByBusinessIdAndSupplierIdAndTypeAndSeriesAndNumber(
             Long businessId, Long supplierId, PurchaseType type, String series, String number);
+    Optional<Purchase> findByIdAndBusinessId(Long id, Long businessId);
 }

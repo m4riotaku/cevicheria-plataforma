@@ -3,6 +3,8 @@ package com.cevicheria.platform.model;
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import com.cevicheria.platform.model.enums.PurchaseOrderStatus;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -22,6 +24,7 @@ import org.hibernate.generator.EventType;
 
 @Getter
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"business_id", "branch_id", "number"}))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PurchaseOrder {
 
