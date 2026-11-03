@@ -2,6 +2,11 @@ package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import com.cevicheria.platform.model.enums.DeliveryStatus;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +23,7 @@ import org.hibernate.generator.EventType;
 
 @Getter
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"business_id", "branch_id", "order_id"}))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Delivery {
 
@@ -61,7 +67,8 @@ public class Delivery {
 
     private LocalDateTime deliveredAt;
 
-    private String status = "PENDIENTE";
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus status = DeliveryStatus.PENDIENTE;
 
     private String addressReference;
 
@@ -197,18 +204,11 @@ public class Delivery {
         this.deliveredAt = value;
     }
 
-    public void changeStatus(String value) {
+    public void changeStatus(DeliveryStatus value) {
         if (value == null) {
             throw new InvalidEntityDataException("El estado es obligatorio");
         }
-        if (value.isBlank()) {
-            throw new InvalidEntityDataException("El estado no puede estar vacío");
-        }
-        String normalized = value.trim().toUpperCase(java.util.Locale.ROOT);
-        if (!(normalized.equals("PENDIENTE") || normalized.equals("ASIGNADO") || normalized.equals("EN_RUTA") || normalized.equals("ENTREGADO") || normalized.equals("FALLIDO"))) {
-            throw new InvalidEntityDataException("El estado no coincide con los valores permitidos por la base de datos");
-        }
-        this.status = normalized;
+        this.status = value;
     }
 
     public void changeAddressReference(String value) {
