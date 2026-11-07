@@ -125,6 +125,15 @@ public class BranchOpeningHour {
         this.closesAt = closesAt;
     }
 
+    public void changeHours(LocalTime opensAt, LocalTime closesAt) {
+        if (opensAt == null || closesAt == null) {
+            throw new InvalidEntityDataException("Las horas de apertura y cierre son obligatorias");
+        }
+        validateTimeWindow(opensAt, closesAt);
+        this.opensAt = opensAt;
+        this.closesAt = closesAt;
+    }
+
     private static void validateTimeWindow(LocalTime start, LocalTime end) {
         if (start != null && end != null && !start.isBefore(end)) {
             throw new InvalidEntityDataException("El horario de inicio debe ser anterior al horario de fin");

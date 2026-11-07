@@ -1,11 +1,14 @@
 package com.cevicheria.platform.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import com.cevicheria.platform.model.Business;
 
-@Repository
-public interface BusinessRepository extends JpaRepository<Business,Long>
-{
+public interface BusinessRepository extends JpaRepository<Business, Long> {
+    List<Business> findByActiveTrue();
+    Optional<Business> findByName(String name);
+    Optional<Business> findByRuc(String ruc);
 }
