@@ -1,11 +1,16 @@
 package com.cevicheria.platform.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import com.cevicheria.platform.model.Branch;
 
-@Repository
-public interface BranchRepository extends JpaRepository<Branch,Long>
-{
+public interface BranchRepository extends JpaRepository<Branch, Long> {
+    List<Branch> findByBusinessId(Long businessId);
+    List<Branch> findByBusinessIdAndActiveTrue(Long businessId);
+    Optional<Branch> findByIdAndBusinessId(Long id, Long businessId);
+    Optional<Branch> findByBusinessIdAndName(Long businessId, String name);
+    Optional<Branch> findByMenuSlug(String menuSlug);
 }
