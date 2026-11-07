@@ -18,8 +18,8 @@ import org.hibernate.generator.EventType;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserBusiness {
-
+public class UserBusiness
+{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -43,42 +43,57 @@ public class UserBusiness {
     @Generated(event = EventType.INSERT)
     private LocalDateTime createdAt;
 
-    public UserBusiness(Business business, UserAccount userAccount) {
+    public UserBusiness(Business business, UserAccount userAccount)
+    {
         changeBusiness(business);
         changeUserAccount(userAccount);
     }
 
-    private void changeBusiness(Business value) {
-        if (value == null) {
+    private void changeBusiness(Business value)
+    {
+        if(value == null)
+        {
             throw new InvalidEntityDataException("El negocio es obligatorio");
         }
         this.business = value;
     }
 
-    private void changeUserAccount(UserAccount value) {
-        if (value == null) {
+    private void changeUserAccount(UserAccount value)
+    {
+        if(value == null)
+        {
             throw new InvalidEntityDataException("El usuario es obligatorio");
         }
         this.userAccount = value;
     }
 
-    private void changeEmployee(Employee value) {
+    public void changeEmployee(Employee value)
+    {
+        if(value != null && this.business.getId() != null
+                && !this.business.getId().equals(value.getBusiness().getId()))
+        {
+            throw new InvalidEntityDataException("El empleado no pertenece al negocio seleccionado");
+        }
         this.employee = value;
     }
 
-    public void enableOwner() {
+    public void enableOwner()
+    {
         this.owner = true;
     }
 
-    public void disableOwner() {
+    public void disableOwner()
+    {
         this.owner = false;
     }
 
-    public void activate() {
+    public void activate()
+    {
         this.active = true;
     }
 
-    public void deactivate() {
+    public void deactivate()
+    {
         this.active = false;
     }
 }
