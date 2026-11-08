@@ -12,7 +12,8 @@ public class UserMapper
                 userAccount.getUserName(),
                 userAccount.getEmail(),
                 userAccount.isActive(),
-                userAccount.getCreatedAt()
+                userAccount.getCreatedAt(),
+                userAccount.getPlatformRole()
         );
     }
 }

@@ -1,8 +1,10 @@
 package com.cevicheria.platform.controller;
 
+import com.cevicheria.platform.dto.AdminPasswordResetRequest;
 import com.cevicheria.platform.dto.UserAccountCreateRequest;
 import com.cevicheria.platform.dto.UserAccountResponse;
 import com.cevicheria.platform.dto.UserAccountUpdateRequest;
+import com.cevicheria.platform.model.enums.PlatformRole;
 import com.cevicheria.platform.service.UserAccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,6 +29,12 @@ public class UserAccountController
 {
     private final UserAccountService userService;
 
+
+    @GetMapping("/platform-roles")
+    public List<PlatformRole> listPlatformRoles()
+    {
+        return userService.listPlatformRoles();
+    }
 
     @GetMapping
     public List<UserAccountResponse> listAllUsers()
@@ -59,6 +68,13 @@ public class UserAccountController
     public UserAccountResponse updateUser(@PathVariable Long id, @RequestBody UserAccountUpdateRequest request)
     {
         return userService.update(id, request);
+    }
+
+    @PutMapping("/{id}/password")
+    public ResponseEntity<Void> resetPassword(@PathVariable Long id, @RequestBody AdminPasswordResetRequest request)
+    {
+        userService.resetPassword(id, request);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
