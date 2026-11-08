@@ -1,7 +1,10 @@
 package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
+import com.cevicheria.platform.model.enums.PlatformRole;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,6 +14,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Entity
@@ -27,7 +32,11 @@ public class UserAccount
 
     private String passwordHash;
 
-    private boolean active = false;
+    private boolean active = true;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    private PlatformRole platformRole = PlatformRole.USER;
 
     private LocalDateTime lastAccessAt;
 
@@ -121,6 +130,16 @@ public class UserAccount
         this.active = false;
     }
 
+    public void changePlatformRole(PlatformRole role)
+    {
+        if (role == null)
+        {
+            throw new InvalidEntityDataException("El rol de plataforma es obligatorio");
+        }
+
+        this.platformRole = role;
+    }
+
     public void changeLastAccessAt(LocalDateTime value)
     {
         this.lastAccessAt = value;
@@ -134,6 +153,22 @@ public class UserAccount
         }
 
         this.sessionVersion = value;
+    }
+
+    public void invalidateSessions()
+    {
+        if (this.sessionVersion == null || this.sessionVersion <= 0)
+        {
+            this.sessionVersion = 1;
+        }
+        else if (this.sessionVersion == Integer.MAX_VALUE)
+        {
+            throw new InvalidEntityDataException("Se agotó la numeración de sesiones");
+        }
+        else
+        {
+            this.sessionVersion++;
+        }
     }
 
     public void changePasswordResetTokenHash(byte[] value)

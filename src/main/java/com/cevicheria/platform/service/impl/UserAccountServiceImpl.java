@@ -1,5 +1,6 @@
 package com.cevicheria.platform.service.impl;
 
+import com.cevicheria.platform.dto.AdminPasswordResetRequest;
 import com.cevicheria.platform.dto.UserAccountCreateRequest;
 import com.cevicheria.platform.dto.UserAccountResponse;
 import com.cevicheria.platform.dto.UserAccountUpdateRequest;
@@ -8,9 +9,12 @@ import com.cevicheria.platform.handlerException.ResourceConflictException;
 import com.cevicheria.platform.handlerException.ResourceNotFoundException;
 import com.cevicheria.platform.mapper.UserMapper;
 import com.cevicheria.platform.model.UserAccount;
+import com.cevicheria.platform.model.enums.PlatformRole;
 import com.cevicheria.platform.repository.UserAccountRepository;
 import com.cevicheria.platform.repository.UserBusinessRepository;
 import com.cevicheria.platform.service.UserAccountService;
+import com.cevicheria.platform.security.UsersAccessService;
+import com.cevicheria.platform.security.UserPasswordRules;
 import com.cevicheria.platform.specification.UserAccountSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -23,18 +27,27 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class UserAccountServiceImpl implements UserAccountService
 {
-    private static final int MIN_PASSWORD_LENGTH = 15;
-
     private static final int MAX_PASSWORD_BYTES = 72;
+
+    private final UsersAccessService usersAccess;
+
+    private final UserAccountRegistrationService registration;
 
     private final UserAccountRepository userRepository;
 
     private final UserBusinessRepository userBusinessRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public List<PlatformRole> listPlatformRoles()
+    {
+        usersAccess.requireSuperAdmin();
+        return List.of(PlatformRole.values());
+    }
 
     @Override
     public List<UserAccountResponse> listAllUsers()
@@ -45,6 +58,7 @@ public class UserAccountServiceImpl implements UserAccountService
     @Override
     public List<UserAccountResponse> searchUsers(String userName, String email, Boolean active)
     {
+        usersAccess.requireSuperAdmin();
         return userRepository.findAll(
                         UserAccountSpecification.byFilter(userName, email, active),
                         Sort.by("id")
@@ -57,6 +71,7 @@ public class UserAccountServiceImpl implements UserAccountService
     @Override
     public UserAccountResponse findUserById(Long id)
     {
+        usersAccess.requireSuperAdmin();
         validateId(id);
 
         return userRepository.findById(id)
@@ -67,6 +82,7 @@ public class UserAccountServiceImpl implements UserAccountService
     @Override
     public UserAccountResponse findUserByEmail(String email)
     {
+        usersAccess.requireSuperAdmin();
         String emailRequest = normalize(email);
 
         if(emailRequest == null || emailRequest.isBlank())
@@ -83,38 +99,22 @@ public class UserAccountServiceImpl implements UserAccountService
     @Transactional
     public UserAccountResponse createUser(UserAccountCreateRequest request)
     {
-        if(request == null)
+        usersAccess.requireSuperAdmin();
+        UserAccount account = registration.register(request);
+
+        if (request.platformRole() != null)
         {
-            throw new BadRequestException("Los datos del usuario son obligatorios");
+            account.changePlatformRole(request.platformRole());
         }
 
-        String userNameRequest = normalize(request.userName());
-        String emailRequest = normalize(request.email());
-        String passwordRequest = request.newPassword();
-
-        validateNewPassword(passwordRequest);
-
-        UserAccount user = new UserAccount(userNameRequest, emailRequest, null);
-
-        if(userRepository.existsByEmail(user.getEmail()))
-        {
-            throw new ResourceConflictException("Ya hay un usuario asociado con este correo");
-        }
-
-        if(userRepository.existsByUserName(user.getUserName()))
-        {
-            throw new ResourceConflictException("Este nombre de usuario ya está en uso");
-        }
-
-        user.changePasswordHash(passwordEncoder.encode(passwordRequest));
-
-        return UserMapper.toDto(userRepository.save(user));
+        return UserMapper.toDto(account);
     }
 
     @Override
     @Transactional
     public UserAccountResponse update(Long id, UserAccountUpdateRequest request)
     {
+        usersAccess.requireSuperAdmin();
         validateId(id);
 
         if(request == null)
@@ -127,8 +127,10 @@ public class UserAccountServiceImpl implements UserAccountService
         String passwordRequest = request.newPassword();
         String currentPasswordRequest = request.currentPassword();
         Boolean activeRequest = request.active();
+        PlatformRole roleRequest = request.platformRole();
 
-        if(userNameRequest == null && emailRequest == null && passwordRequest == null && activeRequest == null)
+        if(userNameRequest == null && emailRequest == null && passwordRequest == null
+                && activeRequest == null && roleRequest == null)
         {
             throw new BadRequestException("Debes enviar al menos un dato para actualizar");
         }
@@ -184,6 +186,18 @@ public class UserAccountServiceImpl implements UserAccountService
         if(passwordRequest != null)
         {
             user.changePasswordHash(passwordEncoder.encode(passwordRequest));
+            user.invalidateSessions();
+        }
+
+        if(roleRequest != null && roleRequest != user.getPlatformRole())
+        {
+            if (id.equals(usersAccess.currentUserId()) && roleRequest != PlatformRole.SUPERADMIN)
+            {
+                throw new BadRequestException("No puedes quitarte a ti mismo el rol SUPERADMIN");
+            }
+
+            user.changePlatformRole(roleRequest);
+            user.invalidateSessions();
         }
 
         if(activeRequest != null)
@@ -194,7 +208,15 @@ public class UserAccountServiceImpl implements UserAccountService
             }
             else
             {
-                user.deactivate();
+                if (id.equals(usersAccess.currentUserId()))
+                {
+                    throw new BadRequestException("No puedes desactivar tu propia cuenta de administración");
+                }
+                if (user.isActive())
+                {
+                    user.deactivate();
+                    user.invalidateSessions();
+                }
             }
         }
 
@@ -205,7 +227,12 @@ public class UserAccountServiceImpl implements UserAccountService
     @Transactional
     public void deleteUser(Long id)
     {
+        usersAccess.requireSuperAdmin();
         validateId(id);
+        if (id.equals(usersAccess.currentUserId()))
+        {
+            throw new BadRequestException("No puedes eliminar tu propia cuenta de administración");
+        }
 
         UserAccount user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("UserAccount", "ID", id));
@@ -216,6 +243,22 @@ public class UserAccountServiceImpl implements UserAccountService
         }
 
         userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(Long id, AdminPasswordResetRequest request) {
+        usersAccess.requireSuperAdmin();
+        validateId(id);
+        if (request == null) {
+            throw new BadRequestException("Datos obligatorios");
+        }
+        String newPassword = request.newPassword();
+        UserPasswordRules.validate(newPassword);
+        UserAccount account = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("UserAccount", "ID", id));
+        account.changePasswordHash(passwordEncoder.encode(newPassword));
+        account.invalidateSessions();
     }
 
     private void validateId(Long id)
@@ -233,19 +276,6 @@ public class UserAccountServiceImpl implements UserAccountService
 
     private void validateNewPassword(String password)
     {
-        if(password == null || password.isBlank())
-        {
-            throw new BadRequestException("La contraseña nueva es obligatoria");
-        }
-
-        if(password.codePointCount(0, password.length()) < MIN_PASSWORD_LENGTH)
-        {
-            throw new BadRequestException("La contraseña nueva debe contener al menos " + MIN_PASSWORD_LENGTH + " caracteres");
-        }
-
-        if(password.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES)
-        {
-            throw new BadRequestException("La contraseña nueva no puede superar 72 bytes UTF-8");
-        }
+        UserPasswordRules.validate(password);
     }
 }

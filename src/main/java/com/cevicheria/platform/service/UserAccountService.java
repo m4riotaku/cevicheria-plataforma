@@ -1,15 +1,18 @@
 package com.cevicheria.platform.service;
 
+import com.cevicheria.platform.dto.AdminPasswordResetRequest;
+
 import com.cevicheria.platform.dto.UserAccountCreateRequest;
 import com.cevicheria.platform.dto.UserAccountResponse;
 import com.cevicheria.platform.dto.UserAccountUpdateRequest;
-import org.hibernate.query.Page;
-import org.springframework.data.domain.Pageable;
+import com.cevicheria.platform.model.enums.PlatformRole;
 
 import java.util.List;
 
 public interface UserAccountService
 {
+    List<PlatformRole> listPlatformRoles();
+
     List<UserAccountResponse> listAllUsers();
 
     List<UserAccountResponse> searchUsers(String userName, String email, Boolean active);
@@ -24,4 +27,5 @@ public interface UserAccountService
 
     void deleteUser(Long id);
 
+    void resetPassword(Long id, AdminPasswordResetRequest request);
 }
