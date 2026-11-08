@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import com.cevicheria.platform.handlerException.ResourceNotFoundException;
 import com.cevicheria.platform.model.Branch;
+import com.cevicheria.platform.model.Employee;
 import com.cevicheria.platform.repository.BranchRepository;
 import com.cevicheria.platform.repository.BusinessRepository;
 import com.cevicheria.platform.repository.EmployeeRepository;
@@ -39,6 +40,17 @@ public class BranchServiceImpl implements BranchService {
     public Branch getById(Long businessId, Long id) {
         return branchRepository.findByIdAndBusinessId(id, businessId)
                 .orElseThrow(() -> new ResourceNotFoundException("Branch", "ID", id));
+    }
+
+    @Override
+    public Employee getResponsibleEmployee(Long businessId, Long employeeId) {
+        if (employeeId == null) {
+            throw new InvalidEntityDataException("El responsable debe ser un empleado registrado en el negocio");
+        }
+        return employeeRepository.findById(employeeId)
+                .filter(employee -> Objects.equals(employee.getBusiness().getId(), businessId))
+                .orElseThrow(() -> new InvalidEntityDataException(
+                        "El responsable debe ser un empleado registrado en el negocio"));
     }
 
     @Override
@@ -111,11 +123,7 @@ public class BranchServiceImpl implements BranchService {
             throw new InvalidEntityDataException("El slug del menú ya está en uso");
         }
         if (branch.getResponsibleEmployee() != null) {
-            Long employeeId = branch.getResponsibleEmployee().getId();
-            var employee = employeeId == null ? null : employeeRepository.findById(employeeId).orElse(null);
-            if (employee == null || !Objects.equals(employee.getBusiness().getId(), businessId)) {
-                throw new InvalidEntityDataException("El responsable debe ser un empleado registrado en el negocio");
-            }
+            getResponsibleEmployee(businessId, branch.getResponsibleEmployee().getId());
         }
     }
 }
