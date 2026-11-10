@@ -1,6 +1,6 @@
-
 package com.cevicheria.platform.security;
 
+import com.cevicheria.platform.repository.AuthSessionRepository;
 import com.cevicheria.platform.repository.UserAccountRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,20 +17,23 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration
 {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtUtil jwtUtil, UserAccountRepository repository) throws Exception
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtUtil jwtUtil,
+                                                   UserAccountRepository users, AuthSessionRepository sessions) throws Exception
     {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/token")
+                        .requestMatchers(HttpMethod.POST, "/token", "/auth/refresh", "/auth/logout")
                         .permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(errors -> errors
-                        .authenticationEntryPoint((req, res, ex) -> res.sendError(401)))
-                .addFilterBefore(new JwtFilter(jwtUtil, repository), UsernamePasswordAuthenticationFilter.class)
+                        .authenticationEntryPoint((req, res, ex) -> res.sendError(401))
+                        .accessDeniedHandler((req, res, ex) -> res.sendError(403)))
+                .addFilterBefore(new JwtFilter(jwtUtil, users, sessions),
+                        UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

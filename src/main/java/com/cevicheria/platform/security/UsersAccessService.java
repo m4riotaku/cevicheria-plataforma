@@ -5,31 +5,25 @@ import com.cevicheria.platform.handlerException.UnauthenticatedRequestException;
 import com.cevicheria.platform.handlerException.ResourceNotFoundException;
 import com.cevicheria.platform.model.UserBusiness;
 import com.cevicheria.platform.model.enums.PlatformRole;
-
-import com.cevicheria.platform.repository.BranchRepository;
-import com.cevicheria.platform.repository.UserAccountRepository;
-import com.cevicheria.platform.repository.UserBusinessRepository;
-import com.cevicheria.platform.repository.UserRoleRepository;
+import com.cevicheria.platform.repository.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
-
 
 @Service
 public class UsersAccessService
 {
-
     private final UserBusinessRepository userBusinesses;
     private final UserRoleRepository userRoles;
+    private final UserBusinessRoleRepository businessRoles;
     private final BranchRepository branches;
     private final UserAccountRepository accounts;
 
-    public UsersAccessService(UserBusinessRepository userBusinesses, UserRoleRepository userRoles, BranchRepository branches, UserAccountRepository accounts)
-    {
-        this.userBusinesses = userBusinesses;
-        this.userRoles = userRoles;
+    public UsersAccessService(UserBusinessRepository members, UserRoleRepository roles, UserBusinessRoleRepository businessRoles, BranchRepository branches, UserAccountRepository accounts) {
+        this.userBusinesses = members;
+        this.userRoles = roles;
+        this.businessRoles = businessRoles;
         this.branches = branches;
         this.accounts = accounts;
     }
@@ -38,33 +32,25 @@ public class UsersAccessService
     {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof String value))
-        {
             throw new UnauthenticatedRequestException("Debes iniciar sesión");
-        }
-
         try
         {
             return Long.valueOf(value);
-        } catch (NumberFormatException ex)
-        {
+        } catch (NumberFormatException ex) {
             throw new UnauthenticatedRequestException("Identidad inválida");
         }
     }
 
     public boolean isSuperAdmin()
     {
-        Long userId = currentUserId();
-        return accounts.findById(userId)
-                .map(user -> user.isActive() && user.getPlatformRole() == PlatformRole.SUPERADMIN)
+        return accounts.findById(currentUserId())
+                .map(u -> u.isActive() && u.getPlatformRole() == PlatformRole.SUPERADMIN)
                 .orElse(false);
     }
 
     public void requireSuperAdmin()
     {
-        if (!isSuperAdmin())
-        {
-            forbidden();
-        }
+        if (!isSuperAdmin()) forbidden();
     }
 
     public boolean isBusinessOwner(Long businessId)
@@ -83,27 +69,53 @@ public class UsersAccessService
         if (!isBusinessOwner(businessId)) forbidden();
     }
 
+    public void requireBusinessPermission(Long businessId, String permission)
+    {
+        if (isBusinessOwner(businessId)) return;
+        UserBusiness member = membership(businessId).filter(UserBusiness::isActive)
+                .orElseThrow(this::forbiddenException);
+        if (businessRoles.hasActivePermission(businessId, member.getId(), permission)) return;
+        forbidden();
+    }
+
+    public void requireBranchPermission(Long businessId, Long branchId, String permission)
+    {
+        ensureBranch(businessId, branchId);
+
+        if (isBusinessOwner(businessId)) return;
+
+        if (!branches.existsByIdAndBusinessIdAndActiveTrue(branchId, businessId)) forbidden();
+
+        UserBusiness member = membership(businessId).filter(UserBusiness::isActive)
+                .orElseThrow(this::forbiddenException);
+
+        if (businessRoles.hasActivePermission(businessId, member.getId(), permission)) return;
+
+        if (userRoles.hasActivePermission(businessId, branchId, member.getId(), permission)) return;
+        forbidden();
+    }
+
     public void requireBranchRead(Long businessId, Long branchId)
     {
         ensureBranch(businessId, branchId);
+
         if (isBusinessOwner(businessId)) return;
-        UserBusiness member = membership(businessId)
-                .filter(UserBusiness::isActive)
+
+        if (!branches.existsByIdAndBusinessIdAndActiveTrue(branchId, businessId)) forbidden();
+
+        UserBusiness member = membership(businessId).filter(UserBusiness::isActive)
                 .orElseThrow(this::forbiddenException);
+
+        if (businessRoles.hasAnyActivePermission(businessId, member.getId())) return;
+
         if (userRoles.existsByBusinessIdAndBranchIdAndUserBusinessIdAndActiveTrue(businessId, branchId, member.getId())) return;
+
         forbidden();
     }
 
     public void requireBranchManage(Long businessId, Long branchId)
     {
-        ensureBranch(businessId, branchId);
-        if (isBusinessOwner(businessId)) return;
-        UserBusiness member = membership(businessId)
-                .filter(UserBusiness::isActive)
-                .orElseThrow(this::forbiddenException);
-        if (userRoles.hasActivePermission(
-                businessId, branchId, member.getId(), "CONFIGURAR")) return;
-        forbidden();
+        requireBranchPermission(businessId, branchId, "CONFIGURAR");
     }
 
     private Optional<UserBusiness> membership(Long businessId)
@@ -113,11 +125,7 @@ public class UsersAccessService
 
     private void ensureBranch(Long businessId, Long branchId)
     {
-        if (!branches.existsByIdAndBusinessId(branchId, businessId))
-        {
-            throw new ResourceNotFoundException(
-                    "Branch", "ID", branchId);
-        }
+        if (!branches.existsByIdAndBusinessId(branchId, businessId)) throw new ResourceNotFoundException("Branch", "ID", branchId);
     }
 
     private ForbiddenOperationException forbiddenException()
