@@ -121,6 +121,10 @@ public class EmployeeSettlement {
         this.payment = value;
     }
 
+    public void assignPayment(Payment value) {
+        changePayment(value);
+    }
+
     public void changeStatus(EmployeeSettlementStates value) {
         this.status = value;
     }

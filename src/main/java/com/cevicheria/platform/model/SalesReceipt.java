@@ -147,6 +147,10 @@ public class SalesReceipt {
         this.number = value;
     }
 
+    public void assignCustomer(Customer value) {
+        changeCustomer(value);
+    }
+
     public void changeOrderBill(OrderBill value) {
         this.orderBill = value;
     }

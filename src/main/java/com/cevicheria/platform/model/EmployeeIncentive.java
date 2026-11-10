@@ -83,6 +83,19 @@ public class EmployeeIncentive
 
     private String notes;
 
+    public EmployeeIncentive(Business business, Branch branch, Employee employee,
+                             EmployeeIncentiveType type, LocalDate recordDate, BigDecimal amount,
+                             EmployeeIncentiveCriterion criterion, String operationKey) {
+        this.business = business;
+        this.branch = branch;
+        this.employee = employee;
+        this.type = type;
+        this.recordDate = recordDate;
+        this.amount = amount;
+        this.criterion = criterion;
+        this.operationKey = operationKey;
+    }
+
     @CurrentTimestamp(event = EventType.INSERT)
     @Setter(AccessLevel.NONE)
     private LocalDateTime createdAt;

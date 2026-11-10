@@ -241,9 +241,6 @@ public class Payment {
         if (value != null && value.signum() < 0) {
             throw new InvalidEntityDataException("El tip no puede ser negativo");
         }
-        if (value != null && value.signum() <= 0) {
-            throw new InvalidEntityDataException("El tip debe ser mayor que cero");
-        }
         this.tip = value;
     }
 
@@ -274,6 +271,10 @@ public class Payment {
             throw new InvalidEntityDataException("El change importe no puede ser negativo");
         }
         this.changeAmount = value;
+    }
+
+    public void assignCustomer(Customer value) {
+        changeCustomer(value);
     }
 
     public void changeExternalReference(String value) {

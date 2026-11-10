@@ -113,6 +113,10 @@ public class OrderBill {
         this.number = value;
     }
 
+    public void assignCustomer(Customer value) {
+        changeCustomer(value);
+    }
+
     public void changeName(String value) {
         if (value == null || value.isBlank()) {
             this.name = null;
