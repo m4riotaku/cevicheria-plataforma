@@ -142,6 +142,10 @@ public class SalesReceiptItem {
         this.quantity = value;
     }
 
+    public void assignBillItem(OrderBillItem value) {
+        changeOrderBillItem(value);
+    }
+
     public void changeUnitValue(BigDecimal value) {
         if (value != null && value.abs().compareTo(new BigDecimal("9999999999999999.99")) > 0) {
             throw new InvalidEntityDataException("El unit value supera el máximo permitido");
