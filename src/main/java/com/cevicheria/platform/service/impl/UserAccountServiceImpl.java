@@ -10,6 +10,7 @@ import com.cevicheria.platform.handlerException.ResourceNotFoundException;
 import com.cevicheria.platform.mapper.UserMapper;
 import com.cevicheria.platform.model.UserAccount;
 import com.cevicheria.platform.model.enums.PlatformRole;
+import com.cevicheria.platform.repository.AuthSessionRepository;
 import com.cevicheria.platform.repository.UserAccountRepository;
 import com.cevicheria.platform.repository.UserBusinessRepository;
 import com.cevicheria.platform.service.UserAccountService;
@@ -39,6 +40,8 @@ public class UserAccountServiceImpl implements UserAccountService
     private final UserAccountRepository userRepository;
 
     private final UserBusinessRepository userBusinessRepository;
+
+    private final AuthSessionRepository authSessionRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -240,6 +243,11 @@ public class UserAccountServiceImpl implements UserAccountService
         if(userBusinessRepository.existsByUserAccountId(id))
         {
             throw new ResourceConflictException("El usuario está asociado a un negocio. Debes desactivarlo en lugar de eliminarlo");
+        }
+
+        if (authSessionRepository.existsByUserAccountId(id))
+        {
+            throw new ResourceConflictException("El usuario tiene sesiones registradas. Debes desactivarlo en lugar de eliminarlo");
         }
 
         userRepository.delete(user);
