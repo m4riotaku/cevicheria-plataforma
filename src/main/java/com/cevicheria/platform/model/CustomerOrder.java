@@ -165,7 +165,7 @@ public class CustomerOrder {
         this.requestKey = normalized;
     }
 
-    private void changeCustomer(Customer value) {
+    public void assignCustomer(Customer value) {
         this.customer = value;
     }
 
