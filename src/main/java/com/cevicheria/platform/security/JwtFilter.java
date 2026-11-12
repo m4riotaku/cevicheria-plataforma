@@ -1,7 +1,6 @@
 package com.cevicheria.platform.security;
 
 import com.cevicheria.platform.model.UserAccount;
-import com.cevicheria.platform.repository.AuthSessionRepository;
 import com.cevicheria.platform.repository.UserAccountRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -14,8 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,13 +20,11 @@ public class JwtFilter extends OncePerRequestFilter
 {
     private final JwtUtil jwtUtil;
     private final UserAccountRepository users;
-    private final AuthSessionRepository sessions;
 
-    public JwtFilter(JwtUtil jwtUtil, UserAccountRepository users, AuthSessionRepository sessions)
+    public JwtFilter(JwtUtil jwtUtil, UserAccountRepository users)
     {
         this.jwtUtil = jwtUtil;
         this.users = users;
-        this.sessions = sessions;
     }
 
     @Override
@@ -41,17 +36,16 @@ public class JwtFilter extends OncePerRequestFilter
         {
             try
             {
-                Claims claims = jwtUtil.validarYLeerToken(header.substring(7));
+                String token = header.substring(7);
+                Claims claims = jwtUtil.validarYLeerToken(token);
                 Long userId = Long.valueOf(claims.getSubject());
                 Number version = claims.get("sv", Number.class);
-                String sid = claims.get("sid", String.class);
-                if (version != null && sid != null && sid.length() == 36
-                        && sessions.existsBySessionIdAndUserAccountIdAndRevokedAtIsNullAndExpiresAtAfter(
-                        sid, userId, LocalDateTime.now(ZoneOffset.UTC)))
+                if (version != null)
                 {
                     users.findById(userId)
                             .filter(UserAccount::isActive)
                             .filter(user -> Objects.equals(user.getSessionVersion(), version.intValue()))
+                            .filter(user -> user.hasAccessTokenHash(JwtTokenHash.hash(token)))
                             .ifPresent(user -> {
                                 var authentication = new UsernamePasswordAuthenticationToken(
                                         user.getId().toString(), null, List.of());

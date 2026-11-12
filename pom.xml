@@ -83,6 +83,8 @@
 	</dependencies>
 
 	<build>
+			<finalName>cevicheria-api</finalName>
+			<defaultGoal>install</defaultGoal>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

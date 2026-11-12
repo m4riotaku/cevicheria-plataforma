@@ -1,6 +1,5 @@
 package com.cevicheria.platform.security;
 
-import com.cevicheria.platform.repository.AuthSessionRepository;
 import com.cevicheria.platform.repository.UserAccountRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +17,7 @@ public class SecurityConfiguration
 {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtUtil jwtUtil,
-                                                   UserAccountRepository users, AuthSessionRepository sessions) throws Exception
+                                                   UserAccountRepository users) throws Exception
     {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -26,13 +25,13 @@ public class SecurityConfiguration
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/token", "/auth/refresh", "/auth/logout")
+                        .requestMatchers(HttpMethod.POST, "/token")
                         .permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(errors -> errors
                         .authenticationEntryPoint((req, res, ex) -> res.sendError(401))
                         .accessDeniedHandler((req, res, ex) -> res.sendError(403)))
-                .addFilterBefore(new JwtFilter(jwtUtil, users, sessions),
+                .addFilterBefore(new JwtFilter(jwtUtil, users),
                         UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

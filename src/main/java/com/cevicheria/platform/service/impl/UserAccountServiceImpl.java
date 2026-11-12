@@ -10,7 +10,6 @@ import com.cevicheria.platform.handlerException.ResourceNotFoundException;
 import com.cevicheria.platform.mapper.UserMapper;
 import com.cevicheria.platform.model.UserAccount;
 import com.cevicheria.platform.model.enums.PlatformRole;
-import com.cevicheria.platform.repository.AuthSessionRepository;
 import com.cevicheria.platform.repository.UserAccountRepository;
 import com.cevicheria.platform.repository.UserBusinessRepository;
 import com.cevicheria.platform.service.UserAccountService;
@@ -40,8 +39,6 @@ public class UserAccountServiceImpl implements UserAccountService
     private final UserAccountRepository userRepository;
 
     private final UserBusinessRepository userBusinessRepository;
-
-    private final AuthSessionRepository authSessionRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -145,6 +142,7 @@ public class UserAccountServiceImpl implements UserAccountService
 
         UserAccount user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("UserAccount", "ID", id));
+        boolean invalidateToken = false;
 
         if(passwordRequest != null)
         {
@@ -173,7 +171,11 @@ public class UserAccountServiceImpl implements UserAccountService
                 throw new ResourceConflictException("El nombre de usuario ya está en uso");
             }
 
-            user.changeUserName(userNameRequest);
+            if (!userNameRequest.equals(user.getUserName()))
+            {
+                user.changeUserName(userNameRequest);
+                invalidateToken = true;
+            }
         }
 
         if(emailRequest != null)
@@ -183,13 +185,17 @@ public class UserAccountServiceImpl implements UserAccountService
                 throw new ResourceConflictException("El correo electrónico ya está en uso");
             }
 
-            user.changeEmail(emailRequest);
+            if (!emailRequest.equals(user.getEmail()))
+            {
+                user.changeEmail(emailRequest);
+                invalidateToken = true;
+            }
         }
 
         if(passwordRequest != null)
         {
             user.changePasswordHash(passwordEncoder.encode(passwordRequest));
-            user.invalidateSessions();
+            invalidateToken = true;
         }
 
         if(roleRequest != null && roleRequest != user.getPlatformRole())
@@ -200,7 +206,7 @@ public class UserAccountServiceImpl implements UserAccountService
             }
 
             user.changePlatformRole(roleRequest);
-            user.invalidateSessions();
+            invalidateToken = true;
         }
 
         if(activeRequest != null)
@@ -218,9 +224,14 @@ public class UserAccountServiceImpl implements UserAccountService
                 if (user.isActive())
                 {
                     user.deactivate();
-                    user.invalidateSessions();
+                    invalidateToken = true;
                 }
             }
+        }
+
+        if (invalidateToken)
+        {
+            user.invalidateSessions();
         }
 
         return UserMapper.toDto(userRepository.save(user));
@@ -243,11 +254,6 @@ public class UserAccountServiceImpl implements UserAccountService
         if(userBusinessRepository.existsByUserAccountId(id))
         {
             throw new ResourceConflictException("El usuario está asociado a un negocio. Debes desactivarlo en lugar de eliminarlo");
-        }
-
-        if (authSessionRepository.existsByUserAccountId(id))
-        {
-            throw new ResourceConflictException("El usuario tiene sesiones registradas. Debes desactivarlo en lugar de eliminarlo");
         }
 
         userRepository.delete(user);
