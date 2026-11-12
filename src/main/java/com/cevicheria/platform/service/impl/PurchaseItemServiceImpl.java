@@ -3,6 +3,9 @@ package com.cevicheria.platform.service.impl;
 import java.util.List;
 import java.util.Objects;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import com.cevicheria.platform.model.enums.PurchaseStatus;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,12 +49,15 @@ public class PurchaseItemServiceImpl implements PurchaseItemService {
         Business business = require(Business.class, request.businessId());
         Branch branch = require(Branch.class, request.branchId());
         Purchase purchase = require(Purchase.class, request.purchaseId());
+        requireDraft(purchase);
         Ingredient ingredient = require(Ingredient.class, request.ingredientId());
         Warehouse warehouse = require(Warehouse.class, request.warehouseId());
         PurchaseItem current = new PurchaseItem(business, branch, purchase, ingredient, warehouse, request.presentationQuantity(), request.acceptedBaseQuantity());
         applyChanges(current, request);
         validateRelations(current);
-        return toResponse(repository.saveAndFlush(current));
+        repository.saveAndFlush(current);
+        refreshPurchaseAmounts(current.getPurchase());
+        return toResponse(current);
     }
 
     @Override
@@ -79,6 +85,7 @@ public class PurchaseItemServiceImpl implements PurchaseItemService {
             throw new BadRequestException("Debes enviar al menos un dato para actualizar");
         }
         PurchaseItem current = find(businessId, id);
+        requireDraft(current.getPurchase());
         if (request.businessId() != null && !Objects.equals(request.businessId(), current.getBusiness().getId())) {
             throw new BadRequestException("El campo businessId no se puede modificar");
         }
@@ -96,14 +103,36 @@ public class PurchaseItemServiceImpl implements PurchaseItemService {
         }
         applyChanges(current, request);
         validateRelations(current);
-        return toResponse(repository.saveAndFlush(current));
+        repository.saveAndFlush(current);
+        refreshPurchaseAmounts(current.getPurchase());
+        return toResponse(current);
     }
 
     @Override
     @Transactional
     public void delete(Long businessId, Long id) {
-        repository.delete(find(businessId, id));
+        PurchaseItem current = find(businessId, id);
+        requireDraft(current.getPurchase());
+        Purchase purchase = current.getPurchase();
+        repository.delete(current);
         repository.flush();
+        refreshPurchaseAmounts(purchase);
+    }
+
+    private void requireDraft(Purchase purchase) {
+        entityManager.lock(purchase, LockModeType.PESSIMISTIC_WRITE);
+        if (purchase.getStatus() != PurchaseStatus.BORRADOR)
+            throw new ResourceConflictException("Solo se pueden cambiar detalles de compras en borrador");
+    }
+
+    private void refreshPurchaseAmounts(Purchase purchase) {
+        BigDecimal subtotal = BigDecimal.ZERO, tax = BigDecimal.ZERO, total = BigDecimal.ZERO;
+        for (PurchaseItem item : repository.findByPurchaseId(purchase.getId())) {
+            subtotal = subtotal.add(item.getSubtotal());
+            tax = tax.add(item.getTax());
+            total = total.add(item.getTotal());
+        }
+        purchase.changeAmounts(subtotal, tax, total);
     }
 
     private PurchaseItem find(Long businessId, Long id) {

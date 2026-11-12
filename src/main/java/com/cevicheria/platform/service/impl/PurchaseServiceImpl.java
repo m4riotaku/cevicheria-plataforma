@@ -20,6 +20,8 @@ import com.cevicheria.platform.model.PurchaseOrder;
 import com.cevicheria.platform.model.Supplier;
 import com.cevicheria.platform.repository.PurchaseRepository;
 import com.cevicheria.platform.service.PurchaseService;
+import com.cevicheria.platform.service.InventoryOperationService;
+import jakarta.persistence.LockModeType;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ import com.cevicheria.platform.service.PurchaseService;
 public class PurchaseServiceImpl implements PurchaseService {
     private final PurchaseRepository repository;
     private final EntityManager entityManager;
+    private final InventoryOperationService inventoryOperations;
 
     @Override
     public List<PurchaseResponse> getByStatus(Long businessId, Long branchId, PurchaseStatus status) {
@@ -55,6 +58,8 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Transactional
     public PurchaseResponse create(PurchaseRequest request) {
         validateRequest(request);
+        if (request.status() != null && request.status() != PurchaseStatus.BORRADOR)
+            throw new BadRequestException("Crea la compra en borrador, agrega sus detalles y luego confírmala");
         Business business = require(Business.class, request.businessId());
         Branch branch = require(Branch.class, request.branchId());
         Supplier supplier = require(Supplier.class, request.supplierId());
@@ -88,6 +93,9 @@ public class PurchaseServiceImpl implements PurchaseService {
             throw new BadRequestException("Debes enviar al menos un dato para actualizar");
         }
         Purchase current = find(businessId, id);
+        entityManager.lock(current, LockModeType.PESSIMISTIC_WRITE);
+        if (current.getStatus() != PurchaseStatus.BORRADOR)
+            throw new ResourceConflictException("Solo se pueden modificar compras en borrador");
         if (request.businessId() != null && !Objects.equals(request.businessId(), current.getBusiness().getId())) {
             throw new BadRequestException("El campo businessId no se puede modificar");
         }
@@ -105,13 +113,19 @@ public class PurchaseServiceImpl implements PurchaseService {
         }
         applyChanges(current, request);
         validateRelations(current);
-        return toResponse(repository.saveAndFlush(current));
+        repository.saveAndFlush(current);
+        if (current.getStatus() == PurchaseStatus.CONFIRMADA) inventoryOperations.receivePurchase(current);
+        return toResponse(current);
     }
 
     @Override
     @Transactional
     public void delete(Long businessId, Long id) {
-        repository.delete(find(businessId, id));
+        Purchase current = find(businessId, id);
+        entityManager.lock(current, LockModeType.PESSIMISTIC_WRITE);
+        if (current.getStatus() != PurchaseStatus.BORRADOR)
+            throw new ResourceConflictException("Solo se pueden eliminar compras en borrador");
+        repository.delete(current);
         repository.flush();
     }
 

@@ -5,6 +5,7 @@ import com.cevicheria.platform.model.enums.PurchaseOrderStatus;
 import java.util.List;
 import java.util.Objects;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,6 +57,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Transactional
     public PurchaseOrderResponse create(PurchaseOrderRequest request) {
         validateRequest(request);
+        if (request.status() != null && request.status() != PurchaseOrderStatus.BORRADOR)
+            throw new BadRequestException("Crea la orden en borrador y agrega sus detalles antes de aprobarla");
         Business business = require(Business.class, request.businessId());
         Branch branch = require(Branch.class, request.branchId());
         Supplier supplier = require(Supplier.class, request.supplierId());
@@ -86,6 +89,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
             throw new BadRequestException("Debes enviar al menos un dato para actualizar");
         }
         PurchaseOrder current = find(businessId, id);
+        entityManager.lock(current, LockModeType.PESSIMISTIC_WRITE);
+        if (current.getStatus() == PurchaseOrderStatus.RECIBIDA || current.getStatus() == PurchaseOrderStatus.PARCIAL || current.getStatus() == PurchaseOrderStatus.ANULADA)
+            throw new ResourceConflictException("La orden ya fue recibida o finalizada");
+        if (request.status() == PurchaseOrderStatus.RECIBIDA || request.status() == PurchaseOrderStatus.PARCIAL)
+            throw new BadRequestException("El estado recibido se calcula al confirmar las compras");
+        if (request.status() == PurchaseOrderStatus.APROBADA) {
+            Long details = entityManager.createQuery("select count(i) from PurchaseOrderItem i where i.purchaseOrder.id = :id", Long.class)
+                    .setParameter("id", id).getSingleResult();
+            if (details == 0) throw new BadRequestException("La orden necesita detalles antes de aprobarse");
+        }
         if (request.businessId() != null && !Objects.equals(request.businessId(), current.getBusiness().getId())) {
             throw new BadRequestException("El campo businessId no se puede modificar");
         }

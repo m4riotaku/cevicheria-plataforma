@@ -4,11 +4,33 @@ import com.cevicheria.platform.dto.ApplicationRequest;
 import com.cevicheria.platform.dto.ApplicationView;
 import com.cevicheria.platform.dto.PaymentRequest;
 import com.cevicheria.platform.dto.PaymentView;
-import com.cevicheria.platform.model.*;
-import com.cevicheria.platform.model.enums.*;
+import com.cevicheria.platform.handlerException.BadRequestException;
+import com.cevicheria.platform.model.CashShift;
+import com.cevicheria.platform.model.Customer;
+import com.cevicheria.platform.model.FinancialAccount;
+import com.cevicheria.platform.model.OrderBill;
+import com.cevicheria.platform.model.Payment;
+import com.cevicheria.platform.model.PaymentApplication;
+import com.cevicheria.platform.model.PurchaseInstallment;
+import com.cevicheria.platform.model.Reservation;
+import com.cevicheria.platform.model.Supplier;
+import com.cevicheria.platform.model.UserBusiness;
+import com.cevicheria.platform.model.enums.CashShiftStates;
+import com.cevicheria.platform.model.enums.FinancialAccountType;
+import com.cevicheria.platform.model.enums.OrderBillStates;
+import com.cevicheria.platform.model.enums.OrderStatus;
+import com.cevicheria.platform.model.enums.PaymentApplicationStates;
+import com.cevicheria.platform.model.enums.PaymentConcept;
+import com.cevicheria.platform.model.enums.PaymentDirection;
+import com.cevicheria.platform.model.enums.PaymentMethod;
+import com.cevicheria.platform.model.enums.PaymentStates;
+import com.cevicheria.platform.model.enums.PurchaseStatus;
+import com.cevicheria.platform.model.enums.ReservationStatus;
+import com.cevicheria.platform.model.enums.SalesReceiptStates;
 import com.cevicheria.platform.repository.UserBusinessRepository;
 import com.cevicheria.platform.service.BillingPaymentsService;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,10 +63,11 @@ public class BillingPaymentsServiceImpl implements BillingPaymentsService {
         guard.required(r.direction(), "direction");
         guard.required(r.concept(), "concept");
         guard.required(r.paymentMethod(), "paymentMethod");
-        guard.check(r.concept() == PaymentConcept.VENTA || r.concept() == PaymentConcept.INCENTIVO,
-                "Para la demostración solo se admiten pagos de VENTA e INCENTIVO");
-        guard.check((r.concept() == PaymentConcept.VENTA && r.direction() == PaymentDirection.INGRESO)
-                        || (r.concept() == PaymentConcept.INCENTIVO && r.direction() == PaymentDirection.EGRESO),
+        guard.check(r.concept() == PaymentConcept.VENTA || r.concept() == PaymentConcept.INCENTIVO
+                        || r.concept() == PaymentConcept.COMPRA || r.concept() == PaymentConcept.GARANTIA,
+                "Concepto no habilitado para este flujo de pagos");
+        guard.check(((r.concept() == PaymentConcept.VENTA || r.concept() == PaymentConcept.GARANTIA) && r.direction() == PaymentDirection.INGRESO)
+                        || ((r.concept() == PaymentConcept.INCENTIVO || r.concept() == PaymentConcept.COMPRA) && r.direction() == PaymentDirection.EGRESO),
                 "La dirección no coincide con el concepto del pago");
         guard.write(r.businessId(), r.branchId(), r.direction() == PaymentDirection.INGRESO ? "COBRAR" : "AUTORIZAR");
         guard.money(r.amount(), "amount", true);
@@ -76,13 +99,20 @@ public class BillingPaymentsServiceImpl implements BillingPaymentsService {
                     "La cuenta no coincide con el turno de caja");
             p.changeCashShift(shift);
         } else if (r.paymentMethod() == PaymentMethod.EFECTIVO) {
-            throw new com.cevicheria.platform.handlerException.BadRequestException("El pago en efectivo requiere un turno abierto");
+            throw new BadRequestException("El pago en efectivo requiere un turno abierto");
         }
         if (r.customerId() != null) {
             Customer c = guard.require(Customer.class, r.customerId());
             guard.businessScope(c.getBusiness(), r.businessId());
             p.assignCustomer(c);
         }
+        if (r.concept() == PaymentConcept.COMPRA) {
+            guard.required(r.supplierId(), "supplierId");
+            Supplier supplier = guard.require(Supplier.class, r.supplierId());
+            guard.businessScope(supplier.getBusiness(), r.businessId());
+            guard.check(supplier.isActive(), "El proveedor está inactivo");
+            p.changeSupplier(supplier);
+        } else guard.check(r.supplierId() == null, "supplierId solo corresponde a pagos de compra");
         if (r.externalReference() != null) p.changeExternalReference(r.externalReference());
         em.persist(p);
         em.flush();
@@ -95,7 +125,7 @@ public class BillingPaymentsServiceImpl implements BillingPaymentsService {
         guard.check(p.getStatus() == PaymentStates.PENDIENTE, "Solo se verifica un pago pendiente");
         UserBusiness current = userBusinesses.findByBusinessIdAndUserAccountId(b, guard.userId())
                 .filter(UserBusiness::isActive)
-                .orElseThrow(() -> new com.cevicheria.platform.handlerException.BadRequestException(
+                .orElseThrow(() -> new BadRequestException(
                         "El verificador debe pertenecer al negocio"));
         p.verifyPayment(LocalDateTime.now(), current);
         return paymentView(p);
@@ -122,14 +152,10 @@ public class BillingPaymentsServiceImpl implements BillingPaymentsService {
         guard.required(r, "request");
         guard.write(r.businessId(), r.branchId(), "COBRAR");
         guard.money(r.amount(), "amount", true);
-        guard.check(r.orderBillId() != null && r.purchaseInstallmentId() == null
-                        && r.reservationId() == null,
-                "En la demostración solo se aplican pagos a cuentas de pedidos");
         Payment p = guard.local(Payment.class, r.paymentId(), r.businessId(), r.branchId(),
                 Payment::getBusiness, Payment::getBranch);
+        em.lock(p, LockModeType.PESSIMISTIC_WRITE);
         guard.check(p.getStatus() == PaymentStates.VERIFICADO, "El pago debe estar verificado");
-        guard.check(p.getConcept() == PaymentConcept.VENTA && p.getDirection() == PaymentDirection.INGRESO,
-                "Solo se puede aplicar un pago de venta a una cuenta");
         Long registeredMovement = em.createQuery(
                         "select count(m) from CashMovement m where m.payment.id = :payment", Long.class)
                 .setParameter("payment", p.getId()).getSingleResult();
@@ -150,15 +176,37 @@ public class BillingPaymentsServiceImpl implements BillingPaymentsService {
         if (r.orderBillId() != null) {
             bill = guard.local(OrderBill.class, r.orderBillId(), r.businessId(), r.branchId(),
                     OrderBill::getBusiness, OrderBill::getBranch);
+            em.lock(bill, LockModeType.PESSIMISTIC_WRITE);
             guard.check(bill.getStatus() == OrderBillStates.ABIERTA, "La cuenta no está abierta");
+            guard.check(bill.getOrder().getStatus() != OrderStatus.CERRADO, "El pedido ya está cerrado");
+            guard.check(p.getConcept() == PaymentConcept.VENTA, "La cuenta requiere un pago de VENTA");
         }
         if (r.purchaseInstallmentId() != null) {
             installment = guard.local(PurchaseInstallment.class, r.purchaseInstallmentId(), r.businessId(), r.branchId(),
                     PurchaseInstallment::getBusiness, PurchaseInstallment::getBranch);
+            em.lock(installment, LockModeType.PESSIMISTIC_WRITE);
+            em.lock(installment.getPurchase(), LockModeType.PESSIMISTIC_WRITE);
+            guard.check(installment.getPurchase().getStatus() == PurchaseStatus.CONFIRMADA, "La compra debe estar confirmada");
+            guard.check(p.getConcept() == PaymentConcept.COMPRA, "La cuota requiere un pago de COMPRA");
+            guard.check(p.getSupplier() != null && p.getSupplier().getId().equals(installment.getPurchase().getSupplier().getId()),
+                    "El pago pertenece a otro proveedor");
+            BigDecimal paid = appliedToInstallment(installment.getId());
+            guard.check(paid.add(r.amount()).compareTo(installment.getAmount()) <= 0, "El pago excede el saldo de la cuota");
+            BigDecimal purchasePaid = em.createQuery("select coalesce(sum(a.amount),0) from PaymentApplication a "
+                            + "where a.purchaseInstallment.purchase.id = :id and a.status = :s", BigDecimal.class)
+                    .setParameter("id", installment.getPurchase().getId()).setParameter("s", PaymentApplicationStates.APLICADA).getSingleResult();
+            guard.check(purchasePaid.add(r.amount()).compareTo(installment.getPurchase().getTotal()) <= 0,
+                    "Las aplicaciones superan el total de la compra");
         }
         if (r.reservationId() != null) {
             reservation = guard.local(Reservation.class, r.reservationId(), r.businessId(), r.branchId(),
                     Reservation::getBusiness, Reservation::getBranch);
+            em.lock(reservation, LockModeType.PESSIMISTIC_WRITE);
+            guard.check(reservation.getStatus() == ReservationStatus.PENDIENTE || reservation.getStatus() == ReservationStatus.CONFIRMADA,
+                    "La reserva no admite garantías en su estado actual");
+            guard.check(p.getConcept() == PaymentConcept.GARANTIA, "La reserva requiere un pago de GARANTIA");
+            guard.check(appliedToReservation(reservation.getId()).add(r.amount()).compareTo(reservation.getRequiredDeposit()) <= 0,
+                    "El pago excede la garantía requerida");
         }
         long unique = guard.count("select count(a) from PaymentApplication a where a.business.id = :b and a.applicationKey = :key",
                 "b", r.businessId(), "key", r.applicationKey());
@@ -189,6 +237,8 @@ public class BillingPaymentsServiceImpl implements BillingPaymentsService {
                     .getSingleResult();
             if (nowPaid.compareTo(bill.getTotal()) == 0) bill.changeStatus(OrderBillStates.PAGADA);
         }
+        if (reservation != null && appliedToReservation(reservation.getId()).compareTo(reservation.getRequiredDeposit()) == 0)
+            reservation.changeStatus(ReservationStatus.CONFIRMADA);
         return applicationView(application);
     }
     @Override @Transactional
@@ -196,21 +246,42 @@ public class BillingPaymentsServiceImpl implements BillingPaymentsService {
         guard.write(b, br, "AUTORIZAR");
         PaymentApplication app = guard.local(PaymentApplication.class, id, b, br,
                 PaymentApplication::getBusiness, PaymentApplication::getBranch);
+        em.lock(app.getPayment(), LockModeType.PESSIMISTIC_WRITE);
+        em.lock(app, LockModeType.PESSIMISTIC_WRITE);
         guard.check(app.getStatus() == PaymentApplicationStates.APLICADA, "La aplicación ya está revertida");
         if (app.getOrderBill() != null) {
+            em.lock(app.getOrderBill(), LockModeType.PESSIMISTIC_WRITE);
+            em.refresh(app.getOrderBill().getOrder(), LockModeType.PESSIMISTIC_WRITE);
+            guard.conflict(app.getOrderBill().getOrder().getStatus() == OrderStatus.CERRADO,
+                    "No se puede revertir un pago de un pedido cerrado");
             long receiptCount = guard.count(
                     "select count(r) from SalesReceipt r where r.orderBill.id = :bill and r.status <> :cancelled",
                     "bill", app.getOrderBill().getId(), "cancelled", SalesReceiptStates.ANULADO);
             guard.conflict(receiptCount > 0,
                     "No se revierte un pago de una cuenta con comprobante; requiere anulación formal");
         }
+        if (app.getReservation() != null) {
+            em.lock(app.getReservation(), LockModeType.PESSIMISTIC_WRITE);
+            guard.conflict(app.getReservation().getStatus() == ReservationStatus.ATENDIDA, "La reserva ya fue atendida");
+            if (app.getReservation().getStatus() == ReservationStatus.CONFIRMADA)
+                app.getReservation().changeStatus(ReservationStatus.PENDIENTE);
+        }
         app.changeStatus(PaymentApplicationStates.REVERTIDA);
         if (app.getOrderBill() != null) app.getOrderBill().changeStatus(OrderBillStates.ABIERTA);
         return applicationView(app);
     }
+    private BigDecimal appliedToInstallment(Long id) {
+        return em.createQuery("select coalesce(sum(a.amount),0) from PaymentApplication a where a.purchaseInstallment.id = :id and a.status = :s", BigDecimal.class)
+                .setParameter("id", id).setParameter("s", PaymentApplicationStates.APLICADA).getSingleResult();
+    }
+    private BigDecimal appliedToReservation(Long id) {
+        return em.createQuery("select coalesce(sum(a.amount),0) from PaymentApplication a where a.reservation.id = :id and a.status = :s", BigDecimal.class)
+                .setParameter("id", id).setParameter("s", PaymentApplicationStates.APLICADA).getSingleResult();
+    }
     private ApplicationView applicationView(PaymentApplication a) {
         return new ApplicationView(a.getId(), a.getBusiness().getId(), a.getBranch().getId(),
                 a.getPayment().getId(), a.getOrderBill() == null ? null : a.getOrderBill().getId(),
-                a.getAmount(), a.getStatus());
+                a.getAmount(), a.getStatus(), a.getPurchaseInstallment() == null ? null : a.getPurchaseInstallment().getId(),
+                a.getReservation() == null ? null : a.getReservation().getId());
     }
 }

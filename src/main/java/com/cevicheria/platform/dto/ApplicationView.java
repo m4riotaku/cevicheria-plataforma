@@ -10,5 +10,7 @@ public record ApplicationView(
         Long paymentId,
         Long orderBillId,
         BigDecimal amount,
-        PaymentApplicationStates status
+        PaymentApplicationStates status,
+        Long purchaseInstallmentId,
+        Long reservationId
 ) {}

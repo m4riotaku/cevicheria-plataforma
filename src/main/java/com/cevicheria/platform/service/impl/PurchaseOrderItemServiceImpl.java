@@ -3,6 +3,8 @@ package com.cevicheria.platform.service.impl;
 import java.util.List;
 import java.util.Objects;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import com.cevicheria.platform.model.enums.PurchaseOrderStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,7 @@ public class PurchaseOrderItemServiceImpl implements PurchaseOrderItemService {
         Business business = require(Business.class, request.businessId());
         Branch branch = require(Branch.class, request.branchId());
         PurchaseOrder purchaseOrder = require(PurchaseOrder.class, request.purchaseOrderId());
+        requireDraft(purchaseOrder);
         Ingredient ingredient = require(Ingredient.class, request.ingredientId());
         PurchaseOrderItem current = new PurchaseOrderItem(business, branch, purchaseOrder, ingredient, request.quantity(), request.estimatedBaseQuantity());
         applyChanges(current, request);
@@ -69,6 +72,7 @@ public class PurchaseOrderItemServiceImpl implements PurchaseOrderItemService {
             throw new BadRequestException("Debes enviar al menos un dato para actualizar");
         }
         PurchaseOrderItem current = find(businessId, id);
+        requireDraft(current.getPurchaseOrder());
         if (request.businessId() != null && !Objects.equals(request.businessId(), current.getBusiness().getId())) {
             throw new BadRequestException("El campo businessId no se puede modificar");
         }
@@ -89,8 +93,16 @@ public class PurchaseOrderItemServiceImpl implements PurchaseOrderItemService {
     @Override
     @Transactional
     public void delete(Long businessId, Long id) {
-        repository.delete(find(businessId, id));
+        PurchaseOrderItem current = find(businessId, id);
+        requireDraft(current.getPurchaseOrder());
+        repository.delete(current);
         repository.flush();
+    }
+
+    private void requireDraft(PurchaseOrder order) {
+        entityManager.lock(order, LockModeType.PESSIMISTIC_WRITE);
+        if (order.getStatus() != PurchaseOrderStatus.BORRADOR)
+            throw new ResourceConflictException("Solo se pueden cambiar detalles de órdenes en borrador");
     }
 
     private PurchaseOrderItem find(Long businessId, Long id) {

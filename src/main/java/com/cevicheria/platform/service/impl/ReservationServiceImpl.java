@@ -5,6 +5,9 @@ import com.cevicheria.platform.model.enums.ReservationStatus;
 import java.util.List;
 import java.util.Objects;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import java.math.BigDecimal;
+import com.cevicheria.platform.model.enums.PaymentApplicationStates;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,6 +84,7 @@ public class ReservationServiceImpl implements ReservationService {
             throw new BadRequestException("Debes enviar al menos un dato para actualizar");
         }
         Reservation current = find(businessId, id);
+        entityManager.lock(current, LockModeType.PESSIMISTIC_WRITE);
         if (request.businessId() != null && !Objects.equals(request.businessId(), current.getBusiness().getId())) {
             throw new BadRequestException("El campo businessId no se puede modificar");
         }
@@ -147,6 +151,26 @@ public class ReservationServiceImpl implements ReservationService {
                 && (!Objects.equals(current.getBusiness().getId(), current.getDiningTable().getBusiness().getId())
                 || !Objects.equals(current.getBranch().getId(), current.getDiningTable().getBranch().getId()))) {
             throw new BadRequestException("La relación diningTable no pertenece al mismo ámbito");
+        }
+        if (current.getDiningTable() != null) {
+            entityManager.lock(current.getDiningTable(), LockModeType.PESSIMISTIC_WRITE);
+            if (current.getGuestCount() > current.getDiningTable().getCapacity())
+                throw new BadRequestException("La reserva supera la capacidad de la mesa");
+            if (current.getStatus() == ReservationStatus.PENDIENTE || current.getStatus() == ReservationStatus.CONFIRMADA) {
+                Long overlaps = entityManager.createQuery("select count(r) from Reservation r where r.diningTable.id = :table "
+                                + "and r.id <> :id and r.status in :states and r.startsAt < :end and r.endsAt > :start", Long.class)
+                        .setParameter("table", current.getDiningTable().getId()).setParameter("id", current.getId() == null ? 0L : current.getId())
+                        .setParameter("states", List.of(ReservationStatus.PENDIENTE, ReservationStatus.CONFIRMADA))
+                        .setParameter("start", current.getStartsAt()).setParameter("end", current.getEndsAt()).getSingleResult();
+                if (overlaps > 0) throw new ResourceConflictException("La mesa ya tiene una reserva en ese horario");
+            }
+        }
+        if (current.getStatus() == ReservationStatus.CONFIRMADA && current.getRequiredDeposit().signum() > 0) {
+            BigDecimal paid = current.getId() == null ? BigDecimal.ZERO : entityManager.createQuery(
+                            "select coalesce(sum(a.amount),0) from PaymentApplication a where a.reservation.id = :id and a.status = :status", BigDecimal.class)
+                    .setParameter("id", current.getId()).setParameter("status", PaymentApplicationStates.APLICADA).getSingleResult();
+            if (paid.compareTo(current.getRequiredDeposit()) < 0)
+                throw new BadRequestException("Completa la garantía antes de confirmar la reserva");
         }
         if (!current.getEndsAt().isAfter(current.getStartsAt())) {
             throw new BadRequestException("La fecha de fin debe ser posterior al inicio");
