@@ -1,11 +1,11 @@
-
 ---
 deployment:
   tasks:
     - >-
       /bin/bash -lc 'set -e;
-      cd /home/cevicherias/repositories/cevicheria-plataforma;
-      /home/cevicherias/apache-maven-3.10.0/bin/mvn -B -ntp clean package;
-      install -m 600 target/cevicheria-api.jar /home/cevicherias/public_html/api/cevicheria-api.jar.new;
-      mv -f /home/cevicherias/public_html/api/cevicheria-api.jar.new /home/cevicherias/public_html/api/cevicheria-api.jar;
+      cd ~/repositories/cevicheria-plataforma;
+      cp -f ~/private/application.yaml ~/repositories/cevicheria-plataforma/src/main/resources/;
+      ~/apache-maven-3.10.0/bin/mvn -B -ntp clean package;
+      install -m 600 target/cevicheria-api.jar ~/public_html/api/cevicheria-api.jar.new;
+      mv -f ~/public_html/api/cevicheria-api.jar.new ~/public_html/api/cevicheria-api.jar;
       sudo -n /usr/bin/systemctl restart cevicheria-api.service'
