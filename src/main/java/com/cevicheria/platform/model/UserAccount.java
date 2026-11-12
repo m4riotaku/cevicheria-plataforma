@@ -2,6 +2,7 @@ package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import com.cevicheria.platform.model.enums.PlatformRole;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
@@ -9,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
+import java.security.MessageDigest;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,6 +43,11 @@ public class UserAccount
     private LocalDateTime lastAccessAt;
 
     private Integer sessionVersion = 1;
+
+    @Getter(AccessLevel.NONE)
+    @JdbcTypeCode(SqlTypes.BINARY)
+    @Column(name = "access_token_hash", columnDefinition = "BINARY(32)")
+    private byte[] accessTokenHash;
 
     private byte[] passwordResetTokenHash;
 
@@ -155,8 +162,24 @@ public class UserAccount
         this.sessionVersion = value;
     }
 
+    public void saveAccessTokenHash(byte[] hash)
+    {
+        if (hash == null || hash.length != 32)
+        {
+            throw new InvalidEntityDataException("El hash del JWT debe contener 32 bytes");
+        }
+        this.accessTokenHash = hash.clone();
+    }
+
+    public boolean hasAccessTokenHash(byte[] hash)
+    {
+        return this.accessTokenHash != null && hash != null
+                && MessageDigest.isEqual(this.accessTokenHash, hash);
+    }
+
     public void invalidateSessions()
     {
+        this.accessTokenHash = null;
         if (this.sessionVersion == null || this.sessionVersion <= 0)
         {
             this.sessionVersion = 1;

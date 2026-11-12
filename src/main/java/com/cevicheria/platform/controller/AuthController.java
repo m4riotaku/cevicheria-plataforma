@@ -19,20 +19,9 @@ public class AuthController
         return authService.login(request);
     }
 
-    @PostMapping("/auth/refresh")
-    public LoginResponse refresh(@RequestBody RefreshTokenRequest request) {
-        return authService.refresh(request);
-    }
-
-    @PostMapping("/auth/logout")
-    public ResponseEntity<Void> logout(@RequestBody RefreshTokenRequest request) {
-        authService.logout(request);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/auth/logout-all")
-    public ResponseEntity<Void> logoutAll() {
-        authService.logoutAll();
+    @PostMapping({"/auth/logout", "/auth/logout-all"})
+    public ResponseEntity<Void> logout() {
+        authService.logout();
         return ResponseEntity.noContent().build();
     }
 

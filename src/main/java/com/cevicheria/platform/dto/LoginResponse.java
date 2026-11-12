@@ -1,5 +1,5 @@
 package com.cevicheria.platform.dto;
 
-public record LoginResponse(String token, String refreshToken, String tokenType, long expiresInSeconds)
+public record LoginResponse(String token, String tokenType, long expiresInSeconds)
 {
 }
