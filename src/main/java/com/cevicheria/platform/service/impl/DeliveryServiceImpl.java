@@ -5,6 +5,14 @@ import com.cevicheria.platform.model.enums.DeliveryStatus;
 import java.util.List;
 import java.util.Objects;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import com.cevicheria.platform.model.OrderItem;
+import com.cevicheria.platform.model.enums.OrderStatus;
+import com.cevicheria.platform.model.enums.OrderItemStatus;
+import com.cevicheria.platform.model.enums.OrderBillStates;
+import com.cevicheria.platform.model.enums.SalesChannel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,10 +67,22 @@ public class DeliveryServiceImpl implements DeliveryService {
         Business business = require(Business.class, request.businessId());
         Branch branch = require(Branch.class, request.branchId());
         CustomerOrder order = require(CustomerOrder.class, request.orderId());
+        entityManager.lock(order, LockModeType.PESSIMISTIC_WRITE);
+        if (order.getSalesChannel() != SalesChannel.DELIVERY) throw new BadRequestException("El pedido debe ser de canal DELIVERY");
+        if (order.getStatus() == OrderStatus.CERRADO || order.getStatus() == OrderStatus.ANULADO || order.getStatus() == OrderStatus.ENTREGADO)
+            throw new BadRequestException("El pedido ya está finalizado");
+        ensureNotBilled(order);
+        if (request.status() != null && request.status() != DeliveryStatus.PENDIENTE && request.status() != DeliveryStatus.ASIGNADO)
+            throw new BadRequestException("El envío debe crearse pendiente o asignado");
         DeliveryZone deliveryZone = require(DeliveryZone.class, request.deliveryZoneId());
+        if (!deliveryZone.isActive()) throw new BadRequestException("La zona de delivery está inactiva");
+        if (order.getSubtotal().subtract(order.getDiscount()).compareTo(deliveryZone.getMinimumOrderAmount()) < 0)
+            throw new BadRequestException("El pedido no alcanza el importe mínimo de la zona de delivery");
         Delivery current = new Delivery(business, branch, order, deliveryZone, request.driverName(), request.address(), request.estimatedMinutes());
+        current.changeDeliveryFeeSnapshot(request.deliveryFeeSnapshot() == null ? deliveryZone.getFee() : request.deliveryFeeSnapshot());
         applyChanges(current, request);
         validateRelations(current);
+        synchronizeFee(current);
         return toResponse(repository.saveAndFlush(current));
     }
 
@@ -88,6 +108,12 @@ public class DeliveryServiceImpl implements DeliveryService {
             throw new BadRequestException("Debes enviar al menos un dato para actualizar");
         }
         Delivery current = find(businessId, id);
+        entityManager.lock(current.getOrder(), LockModeType.PESSIMISTIC_WRITE);
+        entityManager.lock(current, LockModeType.PESSIMISTIC_WRITE);
+        if (current.getStatus() == DeliveryStatus.ENTREGADO) throw new ResourceConflictException("El envío ya fue entregado");
+        if (request.deliveryFeeSnapshot() != null && request.deliveryFeeSnapshot().compareTo(current.getDeliveryFeeSnapshot()) != 0)
+            ensureNotBilled(current.getOrder());
+        validateTransition(current, request.status());
         if (request.businessId() != null && !Objects.equals(request.businessId(), current.getBusiness().getId())) {
             throw new BadRequestException("El campo businessId no se puede modificar");
         }
@@ -101,15 +127,62 @@ public class DeliveryServiceImpl implements DeliveryService {
             throw new BadRequestException("El campo deliveryZoneId no se puede modificar");
         }
         applyChanges(current, request);
+        if (current.getStatus() == DeliveryStatus.EN_RUTA && current.getDispatchedAt() == null)
+            current.changeDispatchedAt(LocalDateTime.now());
+        if (current.getStatus() == DeliveryStatus.ENTREGADO) {
+            if (current.getDeliveredAt() == null) current.changeDeliveredAt(LocalDateTime.now());
+            List<OrderItem> items = entityManager.createQuery("select i from OrderItem i where i.order.id = :id and i.status <> :cancelled", OrderItem.class)
+                    .setParameter("id", current.getOrder().getId()).setParameter("cancelled", OrderItemStatus.ANULADO).getResultList();
+            if (items.isEmpty() || items.stream().anyMatch(i -> i.getStatus() != OrderItemStatus.LISTO && i.getStatus() != OrderItemStatus.ENTREGADO))
+                throw new BadRequestException("Todos los productos deben estar listos antes de entregar el envío");
+            for (OrderItem item : items) {
+                item.changeStatus(OrderItemStatus.ENTREGADO);
+                item.changeDeliveredAt(current.getDeliveredAt());
+            }
+            current.getOrder().changeStatus(OrderStatus.ENTREGADO);
+        }
         validateRelations(current);
+        synchronizeFee(current);
         return toResponse(repository.saveAndFlush(current));
     }
 
     @Override
     @Transactional
     public void delete(Long businessId, Long id) {
-        repository.delete(find(businessId, id));
+        Delivery current = find(businessId, id);
+        entityManager.lock(current.getOrder(), LockModeType.PESSIMISTIC_WRITE);
+        if (current.getStatus() == DeliveryStatus.ENTREGADO) throw new ResourceConflictException("El envío ya fue entregado");
+        ensureNotBilled(current.getOrder());
+        current.changeDeliveryFeeSnapshot(BigDecimal.ZERO);
+        synchronizeFee(current);
+        repository.delete(current);
         repository.flush();
+    }
+
+    private void ensureNotBilled(CustomerOrder order) {
+        Long count = entityManager.createQuery("select count(b) from OrderBill b where b.order.id = :id and b.status <> :status", Long.class)
+                .setParameter("id", order.getId()).setParameter("status", OrderBillStates.ANULADA).getSingleResult();
+        if (count > 0) throw new ResourceConflictException("Configura el envío y su tarifa antes de generar la cuenta");
+    }
+
+    private void synchronizeFee(Delivery delivery) {
+        CustomerOrder order = delivery.getOrder();
+        order.changeAmounts(order.getSubtotal(), order.getDiscount(), order.getTax(), delivery.getDeliveryFeeSnapshot(),
+                order.getSubtotal().subtract(order.getDiscount()).add(order.getTax()).add(delivery.getDeliveryFeeSnapshot()));
+    }
+
+    private void validateTransition(Delivery current, DeliveryStatus target) {
+        if (target == null || target == current.getStatus()) return;
+        boolean valid = switch (current.getStatus()) {
+            case PENDIENTE -> target == DeliveryStatus.ASIGNADO || target == DeliveryStatus.EN_RUTA;
+            case ASIGNADO -> target == DeliveryStatus.EN_RUTA;
+            case EN_RUTA -> target == DeliveryStatus.ENTREGADO || target == DeliveryStatus.FALLIDO;
+            case FALLIDO -> target == DeliveryStatus.ASIGNADO;
+            case ENTREGADO -> false;
+        };
+        if (!valid) throw new BadRequestException("Transición de delivery no permitida");
+        if (target == DeliveryStatus.EN_RUTA && current.getOrder().getStatus() != OrderStatus.LISTO)
+            throw new BadRequestException("El pedido debe estar listo antes de despacharse");
     }
 
     private Delivery find(Long businessId, Long id) {

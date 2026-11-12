@@ -7,6 +7,8 @@ import com.cevicheria.platform.model.enums.*;
 import com.cevicheria.platform.model.id.*;
 import com.cevicheria.platform.repository.*;
 import com.cevicheria.platform.service.OrdersService;
+import com.cevicheria.platform.service.InventoryOperationService;
+import java.math.RoundingMode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.math.BigDecimal;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class OrdersServiceImpl implements OrdersService {
     private final OrdersSupport guard;
+    private final InventoryOperationService inventoryOperations;
     private final EntityManager em;
     private final CustomerOrderRepository orders;
     private final OrderItemRepository items;
@@ -99,6 +102,7 @@ public class OrdersServiceImpl implements OrdersService {
     public OrdersView confirm(Long b, Long br, Long id) {
         guard.write(b, br, "PEDIDOS");
         CustomerOrder order = localOrder(b, br, id);
+        em.lock(order, LockModeType.PESSIMISTIC_WRITE);
         editable(order);
         List<OrderItem> lines = items.findByBusinessIdAndBranchIdAndOrderIdOrderByIdAsc(b, br, id).stream()
                 .filter(i -> i.getStatus() != OrderItemStatus.ANULADO).toList();
@@ -109,6 +113,7 @@ public class OrdersServiceImpl implements OrdersService {
             line.changeConfirmedAt(java.time.LocalDateTime.now());
             createRecipeSnapshot(b, br, line);
         }
+        inventoryOperations.consumeOrder(order);
         order.changeStatus(OrderStatus.CONFIRMADO);
         return view(order);
     }
@@ -124,7 +129,8 @@ public class OrdersServiceImpl implements OrdersService {
         for (RecipeIngredient part : recipeIngredients.findByBusinessIdAndRecipeId(b, recipe.getId())) {
             Ingredient ingredient = part.getIngredient();
             snapshotIngredients.save(new OrderItemRecipeSnapshotIngredient(line.getBusiness(), line.getBranch(),
-                    line, ingredient, ingredient.getName(), ingredient.getBaseUnit(), part.getBaseQuantity()));
+                    line, ingredient, ingredient.getName(), ingredient.getBaseUnit(), part.getBaseQuantity()
+                    .divide(recipe.getServings().multiply(recipe.getYieldRatio()), 6, RoundingMode.HALF_UP)));
         }
     }
 
@@ -133,6 +139,12 @@ public class OrdersServiceImpl implements OrdersService {
         guard.write(b, br, "PEDIDOS");
         CustomerOrder order = localOrder(b, br, id);
         guard.check(order.getStatus() == OrderStatus.ENTREGADO, "Primero entrega todos los productos");
+        em.lock(order, LockModeType.PESSIMISTIC_WRITE);
+        if (order.getSalesChannel() == SalesChannel.DELIVERY) {
+            Long delivered = em.createQuery("select count(d) from Delivery d where d.order.id = :id and d.status = :status", Long.class)
+                    .setParameter("id", id).setParameter("status", DeliveryStatus.ENTREGADO).getSingleResult();
+            guard.check(delivered > 0, "Registra la entrega al cliente antes de cerrar el pedido delivery");
+        }
         Long paid = em.createQuery("select count(x) from OrderBill x where x.order.id = :id and x.status = :status", Long.class)
                 .setParameter("id", id).setParameter("status", OrderBillStates.PAGADA).getSingleResult();
         Long pending = em.createQuery("select count(x) from OrderBill x where x.order.id = :id and x.status = :status", Long.class)
@@ -183,9 +195,11 @@ public class OrdersServiceImpl implements OrdersService {
         guard.businessScope(product.getBusiness(), r.businessId());
         guard.check(product.isActive(), "El producto está inactivo");
         BranchProduct configured = branchProducts.findByBusinessIdAndBranchIdAndProductIdAndSalesChannel(
-                r.businessId(), r.branchId(), r.productId(), order.getSalesChannel())
+                        r.businessId(), r.branchId(), r.productId(), order.getSalesChannel())
                 .orElseThrow(() -> new ResourceNotFoundException("BranchProduct", "productId", r.productId()));
         guard.check(configured.isVisible() && !configured.isBlocked(), "Producto no disponible para el canal seleccionado");
+        guard.check(configured.getPreparationArea() != null,
+                "Configura el área de preparación del producto en esta sucursal y canal");
         OrderItem line = new OrderItem(order.getBusiness(), order.getBranch(), order, product,
                 product.getName(), r.quantity());
         line.changeUnitPrice(guard.money(configured.getPrice(), "precio"));
@@ -248,11 +262,11 @@ public class OrdersServiceImpl implements OrdersService {
         guard.businessScope(modifier.getBusiness(), r.businessId());
         guard.check(modifier.isActive(), "El modificador está inactivo");
         guard.check((modifier.getProduct() == null || Objects.equals(modifier.getProduct().getId(), line.getProduct().getId()))
-                && (modifier.getCategory() == null || (line.getProduct().getCategory() != null
-                && Objects.equals(modifier.getCategory().getId(), line.getProduct().getCategory().getId()))),
+                        && (modifier.getCategory() == null || (line.getProduct().getCategory() != null
+                        && Objects.equals(modifier.getCategory().getId(), line.getProduct().getCategory().getId()))),
                 "El modificador no corresponde al producto");
         guard.conflict(modifiers.findByOrderItemIdOrderByIdAsc(line.getId()).stream()
-                .anyMatch(m -> Objects.equals(m.getModifier().getId(), modifier.getId())),
+                        .anyMatch(m -> Objects.equals(m.getModifier().getId(), modifier.getId())),
                 "El modificador ya está agregado al detalle");
         OrderItemModifier item = new OrderItemModifier(line.getBusiness(), line.getBranch(), line,
                 modifier, modifier.getName(), r.quantity(), modifier.getExtraPrice());
@@ -297,7 +311,7 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     private void applyOrderDetails(CustomerOrder order, Long customerId, Integer count,
-            String name, String phone, String address, String notes) {
+                                   String name, String phone, String address, String notes) {
         if (customerId != null) {
             Customer customer = guard.require(Customer.class, customerId);
             guard.businessScope(customer.getBusiness(), order.getBusiness().getId());

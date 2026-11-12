@@ -14,7 +14,6 @@ import com.cevicheria.platform.dto.ReceiptItemRequest;
 import com.cevicheria.platform.dto.ReceiptItemView;
 import com.cevicheria.platform.dto.ReceiptRequest;
 import com.cevicheria.platform.dto.ReceiptView;
-import com.cevicheria.platform.handlerException.BadRequestException;
 import com.cevicheria.platform.handlerException.ResourceNotFoundException;
 import com.cevicheria.platform.model.*;
 import com.cevicheria.platform.model.enums.*;
@@ -53,6 +52,15 @@ public class BillingSalesServiceImpl implements BillingSalesService {
         guard.write(r.businessId(), r.branchId(), "COBRAR");
         CustomerOrder order = guard.local(CustomerOrder.class, r.orderId(), r.businessId(), r.branchId(),
                 CustomerOrder::getBusiness, CustomerOrder::getBranch);
+        em.lock(order, LockModeType.PESSIMISTIC_WRITE);
+        guard.check(order.getStatus() != OrderStatus.ABIERTO && order.getStatus() != OrderStatus.SOLICITADO
+                        && order.getStatus() != OrderStatus.ANULADO && order.getStatus() != OrderStatus.CERRADO,
+                "Confirma el pedido antes de generar la cuenta");
+        if (order.getSalesChannel() == SalesChannel.DELIVERY) {
+            Long shipments = em.createQuery("select count(d) from Delivery d where d.order.id = :id", Long.class)
+                    .setParameter("id", order.getId()).getSingleResult();
+            guard.check(shipments > 0, "Configura el envío y la tarifa antes de generar la cuenta");
+        }
         guard.required(r.number(), "number");
         guard.check(r.number() > 0, "El número de la cuenta debe ser positivo");
         long existing = guard.count("select count(b) from OrderBill b where b.order.id = :id and b.status <> :status",

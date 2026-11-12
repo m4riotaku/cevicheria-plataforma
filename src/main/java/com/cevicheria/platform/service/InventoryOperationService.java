@@ -3,6 +3,8 @@ package com.cevicheria.platform.service;
 import java.util.List;
 
 import com.cevicheria.platform.model.InventoryOperation;
+import com.cevicheria.platform.model.CustomerOrder;
+import com.cevicheria.platform.model.Purchase;
 import com.cevicheria.platform.model.enums.InventoryOperationStatus;
 
 public interface InventoryOperationService {
@@ -20,4 +22,7 @@ public interface InventoryOperationService {
     InventoryOperation update(Long id, InventoryOperation operation);
 
     void deleteById(Long id);
+    void receivePurchase(Purchase purchase);
+
+    void consumeOrder(CustomerOrder order);
 }

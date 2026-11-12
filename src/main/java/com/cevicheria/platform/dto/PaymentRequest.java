@@ -19,5 +19,6 @@ public record PaymentRequest(
         BigDecimal tip,
         BigDecimal amountReceived,
         BigDecimal changeAmount,
-        String externalReference
+        String externalReference,
+        Long supplierId
 ) {}
