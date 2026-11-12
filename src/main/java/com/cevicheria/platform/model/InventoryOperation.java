@@ -4,10 +4,7 @@ import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import com.cevicheria.platform.model.enums.InventoryOperationStatus;
 import com.cevicheria.platform.model.enums.InventoryOperationType;
 import com.cevicheria.platform.model.enums.InventoryReturnResolution;
-import java.util.List;
-import java.util.ArrayList;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -141,11 +138,11 @@ public class InventoryOperation {
         this.sourceOperation = value;
     }
 
-    private void changePurchase(Purchase value) {
+    public void changePurchase(Purchase value) {
         this.purchase = value;
     }
 
-    private void changeOrder(CustomerOrder value) {
+    public void changeOrder(CustomerOrder value) {
         this.order = value;
     }
 
@@ -198,14 +195,5 @@ public class InventoryOperation {
             throw new InvalidEntityDataException("El URL de evidencia no puede superar 1000 caracteres");
         }
         this.evidenceUrl = normalized;
-    }
-
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "operation", fetch = FetchType.LAZY)
-    private List<InventoryOperationDetail> operationDetails = new ArrayList<>();
-
-    public List<InventoryOperationDetail> getOperationDetails() {
-        return List.copyOf(this.operationDetails);
     }
 }

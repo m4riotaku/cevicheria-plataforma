@@ -1,10 +1,7 @@
 package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
-import java.util.List;
-import java.util.ArrayList;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -96,14 +93,5 @@ public class PreparationArea {
             throw new InvalidEntityDataException("El printer destination no puede superar 250 caracteres");
         }
         this.printerDestination = normalized;
-    }
-
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "preparationArea", fetch = FetchType.LAZY)
-    private List<PreparationAreaKdsSetting> kdsSettings = new ArrayList<>();
-
-    public List<PreparationAreaKdsSetting> getKdsSettings() {
-        return List.copyOf(this.kdsSettings);
     }
 }

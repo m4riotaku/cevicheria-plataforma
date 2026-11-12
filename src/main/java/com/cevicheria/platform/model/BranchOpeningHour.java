@@ -16,7 +16,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BranchOpeningHour {
+public class BranchOpeningHour
+{
 
     @EmbeddedId
     private BranchOpeningHourId id;

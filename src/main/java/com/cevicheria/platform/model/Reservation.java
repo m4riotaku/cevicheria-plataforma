@@ -1,13 +1,10 @@
 package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
-import java.util.List;
-import java.util.ArrayList;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import com.cevicheria.platform.model.enums.ReservationStatus;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -199,14 +196,5 @@ public class Reservation {
         }
         String normalized = value.trim();
         this.notes = normalized;
-    }
-
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "reservation", fetch = FetchType.LAZY)
-    private List<ReservationCancellationTerms> cancellationTerms = new ArrayList<>();
-
-    public List<ReservationCancellationTerms> getCancellationTerms() {
-        return List.copyOf(this.cancellationTerms);
     }
 }

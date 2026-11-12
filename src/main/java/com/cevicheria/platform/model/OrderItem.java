@@ -3,10 +3,7 @@ package com.cevicheria.platform.model;
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import com.cevicheria.platform.model.enums.OrderItemDestination;
 import com.cevicheria.platform.model.enums.OrderItemStatus;
-import java.util.List;
-import java.util.ArrayList;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -389,22 +386,5 @@ public class OrderItem {
         changeDiscount(discount);
         changeTax(tax);
         changeTotal(total);
-    }
-
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "orderItem", fetch = FetchType.LAZY)
-    private List<OrderItemModifier> modifiers = new ArrayList<>();
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "orderItem", fetch = FetchType.LAZY)
-    private List<OrderItemRecipeSnapshot> recipeSnapshots = new ArrayList<>();
-
-    public List<OrderItemModifier> getModifiers() {
-        return List.copyOf(this.modifiers);
-    }
-
-    public List<OrderItemRecipeSnapshot> getRecipeSnapshots() {
-        return List.copyOf(this.recipeSnapshots);
     }
 }

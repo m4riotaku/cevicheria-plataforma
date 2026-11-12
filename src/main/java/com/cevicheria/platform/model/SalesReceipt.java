@@ -2,10 +2,7 @@ package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import com.cevicheria.platform.model.enums.SalesReceiptStates;
-import java.util.List;
-import java.util.ArrayList;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -381,30 +378,5 @@ public class SalesReceipt {
         changeTax(tax);
         changeDeliveryFee(deliveryFee);
         changeTotal(total);
-    }
-
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "salesReceipt", fetch = FetchType.LAZY)
-    private List<SalesReceiptIssuerSnapshot> issuerSnapshots = new ArrayList<>();
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "salesReceipt", fetch = FetchType.LAZY)
-    private List<SalesReceiptCustomerSnapshot> customerSnapshots = new ArrayList<>();
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "salesReceipt", fetch = FetchType.LAZY)
-    private List<SalesReceiptIntegrationAttempt> integrationAttempts = new ArrayList<>();
-
-    public List<SalesReceiptIssuerSnapshot> getIssuerSnapshots() {
-        return List.copyOf(this.issuerSnapshots);
-    }
-
-    public List<SalesReceiptCustomerSnapshot> getCustomerSnapshots() {
-        return List.copyOf(this.customerSnapshots);
-    }
-
-    public List<SalesReceiptIntegrationAttempt> getIntegrationAttempts() {
-        return List.copyOf(this.integrationAttempts);
     }
 }

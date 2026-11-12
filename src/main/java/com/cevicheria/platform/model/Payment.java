@@ -182,7 +182,7 @@ public class Payment {
         this.customer = value;
     }
 
-    private void changeSupplier(Supplier value) {
+    public void changeSupplier(Supplier value) {
         this.supplier = value;
     }
 

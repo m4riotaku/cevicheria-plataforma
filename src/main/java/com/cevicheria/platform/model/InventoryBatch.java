@@ -106,7 +106,7 @@ public class InventoryBatch {
         this.ingredient = value;
     }
 
-    private void changePurchaseItem(PurchaseItem value) {
+    public void changePurchaseItem(PurchaseItem value) {
         this.purchaseItem = value;
     }
 

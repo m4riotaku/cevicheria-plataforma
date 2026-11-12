@@ -2,10 +2,7 @@ package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import com.cevicheria.platform.model.enums.CommissionRuleStates;
-import java.util.List;
-import java.util.ArrayList;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -138,16 +135,8 @@ public class CommissionRule {
         this.validFrom = value;
     }
 
-    public void changeValidUntil(LocalDateTime value) {
+    public void changeValidUntil(LocalDateTime value)
+    {
         this.validUntil = value;
-    }
-
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "commissionRule", fetch = FetchType.LAZY)
-    private List<CommissionRuleRequirement> requirements = new ArrayList<>();
-
-    public List<CommissionRuleRequirement> getRequirements() {
-        return List.copyOf(this.requirements);
     }
 }
