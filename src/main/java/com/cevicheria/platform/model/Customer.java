@@ -8,11 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -50,10 +47,6 @@ public class Customer {
 
     @Generated(event = EventType.INSERT)
     private LocalDateTime createdAt;
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
-    private List<CustomerAddress> addresses = new ArrayList<>();
 
     public Customer(Business business, String name) {
         changeBusiness(business);
@@ -176,9 +169,5 @@ public class Customer {
         }
         changeDocumentType(documentType);
         changeDocumentNumber(documentNumber);
-    }
-
-    public List<CustomerAddress> getAddresses() {
-        return List.copyOf(this.addresses);
     }
 }

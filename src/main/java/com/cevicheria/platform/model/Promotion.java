@@ -2,10 +2,7 @@ package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
 import com.cevicheria.platform.model.enums.PromotionType;
-import java.util.List;
-import java.util.ArrayList;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -132,54 +129,5 @@ public class Promotion {
 
     public void changeValidUntil(LocalDateTime value) {
         this.validUntil = value;
-    }
-
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY)
-    private List<PromotionBranch> promotionBranches = new ArrayList<>();
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY)
-    private List<PromotionChannel> promotionChannels = new ArrayList<>();
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY)
-    private List<PromotionProduct> promotionProducts = new ArrayList<>();
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY)
-    private List<PromotionWeekday> promotionWeekdays = new ArrayList<>();
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY)
-    private List<PromotionTimeWindow> promotionTimeWindows = new ArrayList<>();
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY)
-    private List<PromotionRequirement> promotionRequirements = new ArrayList<>();
-
-    public List<PromotionBranch> getPromotionBranches() {
-        return List.copyOf(this.promotionBranches);
-    }
-
-    public List<PromotionChannel> getPromotionChannels() {
-        return List.copyOf(this.promotionChannels);
-    }
-
-    public List<PromotionProduct> getPromotionProducts() {
-        return List.copyOf(this.promotionProducts);
-    }
-
-    public List<PromotionWeekday> getPromotionWeekdays() {
-        return List.copyOf(this.promotionWeekdays);
-    }
-
-    public List<PromotionTimeWindow> getPromotionTimeWindows() {
-        return List.copyOf(this.promotionTimeWindows);
-    }
-
-    public List<PromotionRequirement> getPromotionRequirements() {
-        return List.copyOf(this.promotionRequirements);
     }
 }

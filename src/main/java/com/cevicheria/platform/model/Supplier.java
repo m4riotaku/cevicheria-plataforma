@@ -1,12 +1,9 @@
 package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
-import java.util.List;
-import java.util.ArrayList;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -178,22 +175,5 @@ public class Supplier {
 
     public void deactivate() {
         this.active = false;
-    }
-
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "supplier", fetch = FetchType.LAZY)
-    private List<SupplierCategoryLink> categoryLinks = new ArrayList<>();
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "supplier", fetch = FetchType.LAZY)
-    private List<SupplierBrandLink> brandLinks = new ArrayList<>();
-
-    public List<SupplierCategoryLink> getCategoryLinks() {
-        return List.copyOf(this.categoryLinks);
-    }
-
-    public List<SupplierBrandLink> getBrandLinks() {
-        return List.copyOf(this.brandLinks);
     }
 }

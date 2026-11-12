@@ -1,10 +1,7 @@
 package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
-import java.util.List;
-import java.util.ArrayList;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -183,13 +180,5 @@ public class Employee {
         }
         String normalized = value.trim();
         this.notes = normalized;
-    }
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
-    private List<EmployeeBranchAssignment> branchAssignments = new ArrayList<>();
-
-    public List<EmployeeBranchAssignment> getBranchAssignments() {
-        return List.copyOf(this.branchAssignments);
     }
 }

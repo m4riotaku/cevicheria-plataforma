@@ -18,7 +18,7 @@ public interface UserBusinessRoleRepository extends JpaRepository<UserBusinessRo
            FROM UserBusinessRole ubr
            LEFT JOIN ubr.userBusiness.employee employee
            JOIN ubr.role role
-           JOIN role.rolePermissions rp
+           JOIN SecurityRolePermission rp ON rp.role = role
            WHERE ubr.business.id = :businessId
              AND ubr.userBusiness.id = :memberId
              AND ubr.userBusiness.business.id = :businessId
@@ -41,7 +41,7 @@ public interface UserBusinessRoleRepository extends JpaRepository<UserBusinessRo
            FROM UserBusinessRole ubr
            LEFT JOIN ubr.userBusiness.employee employee
            JOIN ubr.role role
-           JOIN role.rolePermissions rp
+           JOIN SecurityRolePermission rp ON rp.role = role
            WHERE ubr.business.id = :businessId
              AND ubr.userBusiness.id = :memberId
              AND ubr.userBusiness.business.id = :businessId

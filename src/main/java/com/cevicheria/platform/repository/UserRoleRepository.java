@@ -46,7 +46,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long>
             JOIN ur.userBusiness ub
             LEFT JOIN ub.employee employee
             JOIN ur.role r
-            JOIN r.rolePermissions rp
+            JOIN SecurityRolePermission rp ON rp.role = r
             WHERE ur.business.id = :businessId
               AND ur.branch.id = :branchId
               AND ur.userBusiness.id = :membershipId

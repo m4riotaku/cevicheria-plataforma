@@ -118,11 +118,11 @@ public class InventoryMovement {
         this.batch = value;
     }
 
-    private void changePurchaseItem(PurchaseItem value) {
+    public void changePurchaseItem(PurchaseItem value) {
         this.purchaseItem = value;
     }
 
-    private void changeOrderConsumption(OrderConsumption value) {
+    public void changeOrderConsumption(OrderConsumption value) {
         this.orderConsumption = value;
     }
 

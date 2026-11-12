@@ -1,10 +1,7 @@
 package com.cevicheria.platform.model;
 
 import com.cevicheria.platform.handlerException.InvalidEntityDataException;
-import java.util.List;
-import java.util.ArrayList;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -70,14 +67,5 @@ public class SecurityRole {
 
     public void deactivate() {
         this.active = false;
-    }
-
-
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
-    private List<SecurityRolePermission> rolePermissions = new ArrayList<>();
-
-    public List<SecurityRolePermission> getRolePermissions() {
-        return List.copyOf(this.rolePermissions);
     }
 }
