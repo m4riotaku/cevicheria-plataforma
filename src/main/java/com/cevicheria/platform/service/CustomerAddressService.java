@@ -6,8 +6,10 @@ import com.cevicheria.platform.model.CustomerAddress;
 
 public interface CustomerAddressService {
 
-	
+
 	List<CustomerAddress> getAllCustomerAddress();
+
+	CustomerAddress getCustomerAddressById(Long id);
 
 	CustomerAddress saveCustomerAddress(CustomerAddress customer);
 

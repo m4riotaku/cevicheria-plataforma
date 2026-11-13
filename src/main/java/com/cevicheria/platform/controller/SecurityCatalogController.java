@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,7 +40,7 @@ public class SecurityCatalogController
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createPermission(request));
     }
 
-    @PatchMapping("/security/permissions/{id}")
+    @PutMapping("/security/permissions/{id}")
     public SecurityCatalogResponse updatePermission(@PathVariable Long id, @RequestBody SecurityCatalogRequest request)
     {
         return service.updatePermission(id, request);
@@ -71,7 +71,7 @@ public class SecurityCatalogController
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createFunction(request));
     }
 
-    @PatchMapping("/operational-functions/{id}")
+    @PutMapping("/operational-functions/{id}")
     public SecurityCatalogResponse updateFunction(@PathVariable Long id, @RequestBody SecurityCatalogRequest request)
     {
         return service.updateFunction(id, request);

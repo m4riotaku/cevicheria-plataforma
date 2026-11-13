@@ -11,15 +11,21 @@ import com.cevicheria.platform.model.CustomerAddress;
 
 import lombok.RequiredArgsConstructor;
 
-@Service 
-@RequiredArgsConstructor 
+@Service
+@RequiredArgsConstructor
 public class CustomerAddressServiceImpl implements CustomerAddressService {
 
-    private final CustomerAddressRepository customerAddressRepository;
+	private final CustomerAddressRepository customerAddressRepository;
 
 	@Override
 	public List<CustomerAddress> getAllCustomerAddress() {
 		return this.customerAddressRepository.findAll();
+	}
+
+	@Override
+	public CustomerAddress getCustomerAddressById(Long id) {
+		return customerAddressRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("CustomerAddress", "ID", id));
 	}
 
 	@Override
@@ -29,44 +35,44 @@ public class CustomerAddressServiceImpl implements CustomerAddressService {
 
 	@Override
 	public CustomerAddress updateCustomerAddress(Long id, CustomerAddress customerAddress) {
-	    CustomerAddress currentCustomerAddress = customerAddressRepository.findById(id).orElseThrow(
-					() -> new ResourceNotFoundException("CustomerAddress", "ID", id));
+		CustomerAddress currentCustomerAddress = customerAddressRepository.findById(id).orElseThrow(
+				() -> new ResourceNotFoundException("CustomerAddress", "ID", id));
 
 		if(customerAddress.getLabel() != null) {
-		    currentCustomerAddress.changeLabel(customerAddress.getLabel());
+			currentCustomerAddress.changeLabel(customerAddress.getLabel());
 		}
 
 		if(customerAddress.getAddressLine() != null ) {
-		    currentCustomerAddress.changeAddressLine(customerAddress.getAddressLine());
+			currentCustomerAddress.changeAddressLine(customerAddress.getAddressLine());
 		}
 
 		if(customerAddress.getReference() != null) {
-		    currentCustomerAddress.changeReference(customerAddress.getReference());
+			currentCustomerAddress.changeReference(customerAddress.getReference());
 		}
 
 		if(customerAddress.getUbigeoCode() != null) {
-		    currentCustomerAddress.changeUbigeoCode(customerAddress.getUbigeoCode());
+			currentCustomerAddress.changeUbigeoCode(customerAddress.getUbigeoCode());
 		}
 
 		if(customerAddress.getDepartment() != null) {
-		    currentCustomerAddress.changeDepartment(customerAddress.getDepartment());
+			currentCustomerAddress.changeDepartment(customerAddress.getDepartment());
 		}
 
 		if(customerAddress.getProvince() != null) {
-		    currentCustomerAddress.changeProvince(customerAddress.getProvince());
+			currentCustomerAddress.changeProvince(customerAddress.getProvince());
 		}
 
 		if(customerAddress.getDistrict() != null) {
 			currentCustomerAddress.changeDistrict(customerAddress.getDistrict());
 		}
-		
+
 		return customerAddressRepository.save(currentCustomerAddress);
 	}
 
 	@Override
 	public void deleteCustomerAddressById(Long id) {
-        CustomerAddress customerAddress = customerAddressRepository.findById(id).orElseThrow(
-					() -> new ResourceNotFoundException("CustomerAddress", "ID", id));
-	    customerAddressRepository.deleteById(customerAddress.getId());
+		CustomerAddress customerAddress = customerAddressRepository.findById(id).orElseThrow(
+				() -> new ResourceNotFoundException("CustomerAddress", "ID", id));
+		customerAddressRepository.deleteById(customerAddress.getId());
 	}
 }

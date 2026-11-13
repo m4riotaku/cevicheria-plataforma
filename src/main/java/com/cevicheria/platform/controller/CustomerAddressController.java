@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cevicheria.platform.model.CustomerAddress;
@@ -16,16 +16,21 @@ import com.cevicheria.platform.service.CustomerAddressService;
 
 import lombok.RequiredArgsConstructor;
 
-@RestController 
-@RequestMapping("/customer/address") 
-@RequiredArgsConstructor 
+@RestController
+@RequestMapping("/customer/address")
+@RequiredArgsConstructor
 public class CustomerAddressController {
 
 	private final CustomerAddressService customerAddressService;
 
-	@GetMapping 
+	@GetMapping
 	public List<CustomerAddress> getAllCustomerAddress() {
 		return this.customerAddressService.getAllCustomerAddress();
+	}
+
+	@GetMapping("/{id}")
+	public CustomerAddress getCustomerAddressById(@PathVariable Long id) {
+		return customerAddressService.getCustomerAddressById(id);
 	}
 
 	@PostMapping
@@ -34,11 +39,11 @@ public class CustomerAddressController {
 	}
 
 	@PutMapping("/{id}")
-	public CustomerAddress updateCustomerAddress(@RequestParam Long id, @RequestBody CustomerAddress customerAddress) {
+	public CustomerAddress updateCustomerAddress(@PathVariable Long id, @RequestBody CustomerAddress customerAddress) {
 		return this.customerAddressService.updateCustomerAddress(id, customerAddress);
 	}
 	@DeleteMapping("/{id}")
-	public void deleteCustomerAddress(@RequestParam Long id) {
+	public void deleteCustomerAddress(@PathVariable Long id) {
 		this.customerAddressService.deleteCustomerAddressById(id);
 	}
 }	

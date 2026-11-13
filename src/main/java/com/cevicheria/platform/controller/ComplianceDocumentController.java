@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +37,7 @@ public class ComplianceDocumentController
 
     @GetMapping("/branches/{branchId}/compliance-documents/{id}")
     public ComplianceDocumentResponse findBranch(@PathVariable Long businessId,
-                                @PathVariable Long branchId, @PathVariable Long id)
+                                                 @PathVariable Long branchId, @PathVariable Long id)
     {
         return service.findBranch(businessId, branchId, id);
     }
@@ -54,7 +54,7 @@ public class ComplianceDocumentController
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(businessId, request));
     }
 
-    @PatchMapping("/compliance-documents/{id}")
+    @PutMapping("/compliance-documents/{id}")
     public ComplianceDocumentResponse update(@PathVariable Long businessId, @PathVariable Long id, @RequestBody ComplianceDocumentRequest request)
     {
         return service.update(businessId, id, request);
