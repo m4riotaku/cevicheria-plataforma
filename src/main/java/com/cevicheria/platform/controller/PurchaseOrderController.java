@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +27,7 @@ public class PurchaseOrderController {
 
     @GetMapping("/filter/status")
     public List<PurchaseOrderResponse> getByStatus(@RequestParam Long businessId, @RequestParam Long branchId,
-                                        @RequestParam PurchaseOrderStatus status) {
+                                                   @RequestParam PurchaseOrderStatus status) {
         return service.getByStatus(businessId, branchId, status);
     }
 
@@ -46,9 +46,9 @@ public class PurchaseOrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public PurchaseOrderResponse update(@RequestParam Long businessId, @PathVariable Long id,
-                                 @RequestBody PurchaseOrderRequest request) {
+                                        @RequestBody PurchaseOrderRequest request) {
         return service.update(businessId, id, request);
     }
 

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +27,7 @@ public class DeliveryController {
 
     @GetMapping("/filter/status")
     public List<DeliveryResponse> getByStatus(@RequestParam Long businessId, @RequestParam Long branchId,
-                                        @RequestParam DeliveryStatus status) {
+                                              @RequestParam DeliveryStatus status) {
         return service.getByStatus(businessId, branchId, status);
     }
 
@@ -46,9 +46,9 @@ public class DeliveryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public DeliveryResponse update(@RequestParam Long businessId, @PathVariable Long id,
-                                 @RequestBody DeliveryRequest request) {
+                                   @RequestBody DeliveryRequest request) {
         return service.update(businessId, id, request);
     }
 
